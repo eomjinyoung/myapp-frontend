@@ -1,0 +1,25 @@
+{
+  "name": "vibeapp-frontend",
+  "version": "1.0.0",
+  "description": "Premium static frontend for vibeapp",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eomjinyoung/myapp-frontend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/eomjinyoung/myapp-frontend/issues"
+  },
+  "homepage": "https://github.com/eomjinyoung/myapp-frontend#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
