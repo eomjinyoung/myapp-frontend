@@ -1,15 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const proxy = require('express-http-proxy');
 const app = express();
 const port = process.env.PORT || 3000;
+const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:8080';
 
-// API Proxy to backend (resolves CORS)
-app.use('/api', proxy('http://localhost:8080', {
-  proxyReqPathResolver: (req) => {
-    return '/api' + req.url;
-  }
-}));
+// Serve environment variables to the frontend
+app.get('/js/config.js', (req, res) => {
+  res.type('application/javascript');
+  res.send(`window.ENV = { BACKEND_API_URL: '${backendUrl}' };`);
+});
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));

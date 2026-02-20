@@ -1,4 +1,4 @@
-const API_BASE_URL = ''; // Uses local proxy on the same origin
+const API_BASE_URL = window.ENV ? window.ENV.BACKEND_API_URL : '';
 
 const API = {
     async call(url, options = {}) {
