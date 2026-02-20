@@ -20,27 +20,31 @@ myapp-frontend/
 │   │   └── style.css       # 프리미엄 스타일 및 애니메이션
 │   ├── js/
 │   │   ├── auth.js         # JWT 및 세션 관리
-│   │   ├── api.js          # Fetch API 래퍼 (자동 토큰 갱신)
-│   │   └── app.js          # 인터랙티브 프론트엔드 로직
+│   │   ├── api.js          # Fetch API 래퍼 (CORS 기반 직접 통신)
+│   │   ├── app.js          # 인터랙티브 프론트엔드 로직
+│   │   └── config.js       # (가상 라우트) 서버에서 주입되는 환경 설정
 │   ├── index.html          # 메인 랜딩 페이지
 │   ├── login.html          # 로그인 페이지
 │   ├── signup.html         # 회원가입 페이지
 │   ├── posts.html          # 게시글 목록 페이지
+│   ├── profile.html        # 사용자 프로필 및 비밀번호 변경
 │   └── post_form.html      # 게시글 작성/수정 페이지
-├── server.js               # Express 서버 설정
+├── server.js               # Express 서버 및 설정 주입
+├── .env                    # 환경 변수 설정 (API URL 등)
+├── .env.example            # 환경 변수 템플릿
 ├── package.json            # 종속성 및 스크립트
 └── README.md               # 프로젝트 문서
 ```
 
 ## ✨ 주요 특징
 - **현대적인 UI:** 활기찬 그라데이션이 적용된 글래스모피즘 기반 디자인.
-- **REST API 연동:** OpenAPI 명세 기반의 게시글 관리 및 사용자 인증.
+- **REST API 직접 연동:** CORS 기반으로 백엔드 서버와 직접 통신 (프록시 제거로 성능 최적화).
+- **동적 설정 주입:** 서버의 환경 변수(`.env`)를 브라우저에 안전하게 주입하는 시스템.
 - **보안 인증:** 
   - JWT (AccessToken/RefreshToken) 기반 Bearer 인증.
-  - `localStorage`를 이용한 토큰 저장.
   - 액세스 토큰 만료 시 자동으로 리프레시 토큰을 이용해 재발급.
-- **마이크로 애니메이션:** 부드러운 전환 효과 및 배경 애니메이션 블롭(Blobs).
-- **반응형:** 다양한 화면 크기에 최적화됨.
+- **사용자 관리:** 프로필 조회 및 비밀번호 변경 기능 포함.
+- **반응형:** 다양한 화면 크기에 최적화 및 커스텀 스크롤바 적용.
 - **경량화:** 최소한의 종속성으로 정적 콘텐츠를 효율적으로 제공.
 
 ## REST API 서버
@@ -59,6 +63,11 @@ myapp-frontend/
    ```bash
    npm install
    ```
+3. 환경 변수를 설정합니다:
+   ```bash
+   cp .env.example .env
+   # .env 파일을 열어 BACKEND_API_URL을 실제 백엔드 주소로 수정하세요.
+   ```
 
 ### 애플리케이션 실행
 개발 서버를 시작합니다:
@@ -66,6 +75,7 @@ myapp-frontend/
 npm start
 ```
 애플리케이션은 [http://localhost:3000](http://localhost:3000)에서 확인할 수 있습니다.
+API 요청은 `.env`에 설정된 백엔드 서버로 직접 전송됩니다.
 
 ## 📊 상태 확인 (Health Check)
 서버는 다음과 같은 상태 확인 엔드포인트를 제공합니다:
