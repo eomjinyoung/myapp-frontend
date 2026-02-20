@@ -19,8 +19,14 @@ myapp-frontend/
 │   ├── css/
 │   │   └── style.css       # 프리미엄 스타일 및 애니메이션
 │   ├── js/
+│   │   ├── auth.js         # JWT 및 세션 관리
+│   │   ├── api.js          # Fetch API 래퍼 (자동 토큰 갱신)
 │   │   └── app.js          # 인터랙티브 프론트엔드 로직
-│   └── index.html          # 메인 랜딩 페이지
+│   ├── index.html          # 메인 랜딩 페이지
+│   ├── login.html          # 로그인 페이지
+│   ├── signup.html         # 회원가입 페이지
+│   ├── posts.html          # 게시글 목록 페이지
+│   └── post_form.html      # 게시글 작성/수정 페이지
 ├── server.js               # Express 서버 설정
 ├── package.json            # 종속성 및 스크립트
 └── README.md               # 프로젝트 문서
@@ -28,9 +34,19 @@ myapp-frontend/
 
 ## ✨ 주요 특징
 - **현대적인 UI:** 활기찬 그라데이션이 적용된 글래스모피즘 기반 디자인.
+- **REST API 연동:** OpenAPI 명세 기반의 게시글 관리 및 사용자 인증.
+- **보안 인증:** 
+  - JWT (AccessToken/RefreshToken) 기반 Bearer 인증.
+  - `localStorage`를 이용한 토큰 저장.
+  - 액세스 토큰 만료 시 자동으로 리프레시 토큰을 이용해 재발급.
 - **마이크로 애니메이션:** 부드러운 전환 효과 및 배경 애니메이션 블롭(Blobs).
 - **반응형:** 다양한 화면 크기에 최적화됨.
 - **경량화:** 최소한의 종속성으로 정적 콘텐츠를 효율적으로 제공.
+
+## REST API 서버
+
+- 서버 주소: http://localhost:8080
+- API 명세: http://localhost:8080/v3/api-docs
 
 ## 🚦 시작하기
 

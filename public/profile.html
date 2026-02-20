@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - VibeApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glass-container">
+        <header>
+            <h1 class="logo" style="cursor: pointer" onclick="location.href='/'">Vibe<span>App</span></h1>
+            <nav>
+                <ul></ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="profile-container">
+                <h2 class="hero-title" style="font-size: 2.5rem">Your <span>Profile</span></h2>
+
+                <section class="profile-card">
+                    <h3 style="margin-bottom: 20px">Account Information</h3>
+                    <div id="user-info">
+                        <div class="info-row">
+                            <span class="info-label">Name</span>
+                            <span class="info-value" id="me-name">Loading...</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email</span>
+                            <span class="info-value" id="me-email">Loading...</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="profile-card">
+                    <h3 style="margin-bottom: 20px">Change Password</h3>
+                    <form id="password-form" class="form-section">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" required placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" required placeholder="••••••••" minlength="4">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="newPasswordConfirm" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Auth.isLoggedIn()) {
+                location.href = '/login.html';
+                return;
+            }
+
+            // Load user info
+            try {
+                const response = await API.call('/api/user/me');
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('me-name').textContent = user.name;
+                    document.getElementById('me-email').textContent = user.email;
+                    // Update stored name if changed
+                    localStorage.setItem('userName', user.name);
+                } else if (response.status === 401) {
+                    location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        });
+
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const newPasswordConfirm = document.getElementById('newPasswordConfirm').value;
+
+            if (newPassword !== newPasswordConfirm) {
+                alert('New passwords do not match');
+                return;
+            }
+
+            try {
+                const response = await API.call('/api/user/password', {
+                    method: 'POST',
+                    body: JSON.stringify({ currentPassword, newPassword, newPasswordConfirm })
+                });
+
+                if (response.ok) {
+                    alert('Password successfully changed!');
+                    document.getElementById('password-form').reset();
+                } else {
+                    let errorMessage = 'Check your current password';
+                    try {
+                        const data = await response.json();
+                        errorMessage = data.message || errorMessage;
+                    } catch (e) {
+                        try { errorMessage = await response.text(); } catch (textErr) { }
+                    }
+                    alert(`Failed to change password: ${errorMessage}`);
+                }
+            } catch (error) {
+                console.error('Password change error:', error);
+                alert('Network error or server is offline.');
+            }
+        });
+    </script>
+</body>
+
+</html>

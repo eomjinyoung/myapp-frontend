@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Form - VibeApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .post-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        input,
+        textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        textarea {
+            height: 200px;
+            resize: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glass-container">
+        <header>
+            <h1 class="logo" style="cursor: pointer" onclick="location.href='/'">Vibe<span>App</span></h1>
+            <nav>
+                <ul></ul>
+            </nav>
+        </header>
+
+        <main>
+            <h2 class="hero-title" id="form-title" style="font-size: 2rem">New <span>Post</span></h2>
+            <form id="post-form" class="post-form">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="title" required placeholder="Enter title">
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <input type="text" id="tags" placeholder="e.g. vibe, app, modern (comma separated)">
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="content" required placeholder="Write your content here..."></textarea>
+                </div>
+                <div style="display: flex; gap: 15px">
+                    <button type="submit" class="btn btn-primary" id="submit-btn" style="flex: 1">Create Post</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="location.href='/posts.html'">Cancel</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const postNo = urlParams.get('no');
+
+        async function initForm() {
+            if (postNo) {
+                document.getElementById('form-title').innerHTML = 'Edit <span>Post</span>';
+                document.getElementById('submit-btn').textContent = 'Update Post';
+
+                const response = await API.call(`/api/posts/${postNo}`);
+                if (response.ok) {
+                    const post = await response.json();
+                    document.getElementById('title').value = post.title;
+                    document.getElementById('tags').value = post.tags || '';
+                    document.getElementById('content').value = post.content;
+                } else {
+                    alert('Failed to load post data');
+                    location.href = '/posts.html';
+                }
+            }
+        }
+
+        document.getElementById('post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const tags = document.getElementById('tags').value;
+            const content = document.getElementById('content').value;
+
+            const method = postNo ? 'PATCH' : 'POST';
+            const url = postNo ? `/api/posts/${postNo}` : '/api/posts';
+
+            const response = await API.call(url, {
+                method,
+                body: JSON.stringify({ title, tags, content, no: postNo })
+            });
+
+            if (response.ok) {
+                alert(postNo ? 'Post updated' : 'Post created');
+                location.href = '/posts.html';
+            } else {
+                const data = await response.json();
+                alert(`Error: ${data.message || 'Action failed'}`);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initForm);
+    </script>
+</body>
+
+</html>
