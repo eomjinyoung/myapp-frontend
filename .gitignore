@@ -1,8 +1,0 @@
-node_modules/
-.DS_Store
-*.log
-.gemini/
-.agent/
-.agents/
-.system_generated/
-.env

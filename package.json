@@ -1,10 +1,9 @@
 {
-  "name": "vibeapp-frontend",
+  "name": "myapp-frontend",
   "version": "1.0.0",
-  "description": "Premium static frontend for vibeapp",
-  "main": "server.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

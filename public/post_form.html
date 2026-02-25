@@ -4,135 +4,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Form - VibeApp</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>글 쓰기 - My REST App</title>
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .post-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        input,
-        textarea {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: inherit;
-        }
-
-        textarea {
-            height: 200px;
-            resize: none;
-        }
-
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-    </style>
 </head>
 
 <body>
-    <div class="glass-container">
-        <header>
-            <h1 class="logo" style="cursor: pointer" onclick="location.href='/'">Vibe<span>App</span></h1>
-            <nav>
-                <ul></ul>
-            </nav>
-        </header>
+    <nav class="nav">
+        <div class="nav-brand">My REST App</div>
+        <div class="nav-links">
+            <a href="/index.html" class="nav-link">홈</a>
+            <a href="/posts.html" class="nav-link active">게시글</a>
+            <a href="/profile.html" class="nav-link">프로필</a>
+            <a href="#" id="logoutBtn" class="nav-link">로그아웃</a>
+        </div>
+    </nav>
 
-        <main>
-            <h2 class="hero-title" id="form-title" style="font-size: 2rem">New <span>Post</span></h2>
-            <form id="post-form" class="post-form">
+    <main class="container">
+        <div class="card" style="max-width: none;">
+            <h1 id="formTitle">새 글 작성</h1>
+            <p id="formSubtitle" class="muted">나만의 소중한 이야기를 들려주세요.</p>
+
+            <form id="postForm">
                 <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="title" required placeholder="Enter title">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" placeholder="제목을 입력하세요" required maxlength="100">
                 </div>
                 <div class="form-group">
-                    <label>Tags</label>
-                    <input type="text" id="tags" placeholder="e.g. vibe, app, modern (comma separated)">
+                    <label for="tags">태그</label>
+                    <input type="text" id="tags" placeholder="태그를 쉼표(,)로 구분하여 입력하세요 (예: 맛집, 일상)">
                 </div>
                 <div class="form-group">
-                    <label>Content</label>
-                    <textarea id="content" required placeholder="Write your content here..."></textarea>
+                    <label for="content">내용</label>
+                    <textarea id="contentField"
+                        style="width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; color: var(--text-main); font-size: 1rem; min-height: 300px; outline: none;"
+                        placeholder="내용을 입력하세요" required></textarea>
                 </div>
-                <div style="display: flex; gap: 15px">
-                    <button type="submit" class="btn btn-primary" id="submit-btn" style="flex: 1">Create Post</button>
-                    <button type="button" class="btn btn-secondary"
-                        onclick="location.href='/posts.html'">Cancel</button>
+
+                <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">저장하기</button>
+                    <button type="button" class="btn" onclick="history.back()"
+                        style="background: var(--card-bg);">취소</button>
                 </div>
             </form>
-        </main>
-    </div>
+        </div>
+    </main>
 
-    <div class="background-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-3"></div>
-    </div>
-
-    <script src="/js/auth.js"></script>
-    <script src="/js/config.js"></script>
     <script src="/js/api.js"></script>
-    <script src="/js/app.js"></script>
+    <script src="/js/posts.js"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const postNo = urlParams.get('no');
-
-        async function initForm() {
-            if (postNo) {
-                document.getElementById('form-title').innerHTML = 'Edit <span>Post</span>';
-                document.getElementById('submit-btn').textContent = 'Update Post';
-
-                const response = await API.call(`/api/posts/${postNo}`);
-                if (response.ok) {
-                    const post = await response.json();
-                    document.getElementById('title').value = post.title;
-                    document.getElementById('tags').value = post.tags || '';
-                    document.getElementById('content').value = post.content;
-                } else {
-                    alert('Failed to load post data');
-                    location.href = '/posts.html';
-                }
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 인증 체크
+            if (!api.getTokens().access) {
+                location.href = '/login.html';
+                return;
             }
-        }
 
-        document.getElementById('post-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('title').value;
-            const tags = document.getElementById('tags').value;
-            const content = document.getElementById('content').value;
+            const params = new URLSearchParams(location.search);
+            const postNo = params.get('no');
 
-            const method = postNo ? 'PATCH' : 'POST';
-            const url = postNo ? `/api/posts/${postNo}` : '/api/posts';
-
-            const response = await API.call(url, {
-                method,
-                body: JSON.stringify({ title, tags, content, no: postNo })
+            // 로그아웃 연동
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                api.clearAndRedirect();
             });
 
-            if (response.ok) {
-                alert(postNo ? 'Post updated' : 'Post created');
-                location.href = '/posts.html';
-            } else {
-                const data = await response.json();
-                alert(`Error: ${data.message || 'Action failed'}`);
-            }
-        });
+            // 수정 모드인 경우 데이터 로드
+            if (postNo) {
+                document.getElementById('formTitle').innerText = '글 수정하기';
+                document.getElementById('formSubtitle').innerText = '기존의 내용을 멋지게 수정해보세요.';
 
-        document.addEventListener('DOMContentLoaded', initForm);
+                const post = await posts.fetchDetail(postNo);
+                if (post) {
+                    document.getElementById('title').value = post.title;
+                    document.getElementById('tags').value = post.tags || '';
+                    document.getElementById('contentField').value = post.content || '';
+                } else {
+                    alert('게시글 정보를 불러올 수 없습니다.');
+                    history.back();
+                }
+            }
+
+            // 폼 제출 처리
+            document.getElementById('postForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const postData = {
+                    title: document.getElementById('title').value,
+                    content: document.getElementById('contentField').value,
+                    tags: document.getElementById('tags').value
+                };
+
+                const success = await posts.save(postData, postNo);
+                if (success) {
+                    alert('성공적으로 저장되었습니다.');
+                    location.href = postNo ? `/post_detail.html?no=${postNo}` : '/posts.html';
+                }
+            });
+        });
     </script>
 </body>
 

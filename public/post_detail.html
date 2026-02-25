@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 상세 - My REST App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .detail-meta {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .post-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            min-height: 200px;
+            white-space: pre-wrap;
+        }
+
+        .tag-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="nav-brand">My REST App</div>
+        <div class="nav-links">
+            <a href="/index.html" class="nav-link">홈</a>
+            <a href="/posts.html" class="nav-link active">게시글</a>
+            <a href="/profile.html" class="nav-link">프로필</a>
+            <a href="#" id="logoutBtn" class="nav-link">로그아웃</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="card" style="max-width: none; min-height: 500px;">
+            <div id="loading" class="text-center" style="padding: 5rem;">
+                <p class="muted">고객님의 소중한 글을 불러오고 있습니다...</p>
+            </div>
+
+            <div id="content" style="display: none;">
+                <h1 id="postTitle"
+                    style="background: none; -webkit-text-fill-color: var(--text-main); margin-bottom: 0.5rem;"></h1>
+
+                <div class="detail-meta">
+                    <span id="postAuthor">작성자: -</span>
+                    <span id="postDate">작성일: -</span>
+                    <span id="postViews">조회수: 0</span>
+                </div>
+
+                <div id="postBody" class="post-content"></div>
+
+                <div id="postTags" style="margin-top: 2rem;"></div>
+
+                <div
+                    style="margin-top: 3rem; display: flex; justify-content: space-between; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+                    <a href="/posts.html" class="btn"
+                        style="width: auto; padding: 0.6rem 2rem; background: var(--card-bg);">목록으로</a>
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="editBtn" class="btn btn-primary"
+                            style="width: auto; padding: 0.6rem 2rem;">수정하기</button>
+                        <button id="deleteBtn" class="btn"
+                            style="width: auto; padding: 0.6rem 2rem; background: rgba(239, 68, 68, 0.1); color: var(--error);">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/posts.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 인증 체크
+            if (!api.getTokens().access) {
+                location.href = '/login.html';
+                return;
+            }
+
+            const params = new URLSearchParams(location.search);
+            const postNo = params.get('no');
+
+            if (!postNo) {
+                alert('잘못된 접근입니다.');
+                location.href = '/posts.html';
+                return;
+            }
+
+            // 로그아웃 연동
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                api.clearAndRedirect();
+            });
+
+            // 데이터 로드
+            const post = await posts.fetchDetail(postNo);
+
+            if (post) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                document.getElementById('postTitle').innerText = post.title;
+                document.getElementById('postAuthor').innerText = `작성자: ${post.authorName || '익명'}`;
+                document.getElementById('postDate').innerText = `작성일: ${posts.formatDate(post.createdAt)}`;
+                document.getElementById('postViews').innerText = `조회수: ${post.views || 0}`;
+                document.getElementById('postBody').innerText = post.content || '';
+
+                if (post.tags) {
+                    const tagsHtml = post.tags.split(',').map(tag => `<span class="tag-badge">#${tag.trim()}</span>`).join('');
+                    document.getElementById('postTags').innerHTML = tagsHtml;
+                }
+
+                // 버튼 연동
+                document.getElementById('editBtn').onclick = () => location.href = `/post_form.html?no=${postNo}`;
+                document.getElementById('deleteBtn').onclick = async () => {
+                    if (await posts.delete(postNo)) {
+                        location.href = '/posts.html';
+                    }
+                };
+            } else {
+                alert('게시글을 찾을 수 없습니다.');
+                location.href = '/posts.html';
+            }
+        });
+    </script>
+</body>
+
+</html>
