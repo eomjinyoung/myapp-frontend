@@ -17,9 +17,11 @@ export const Layout = () => {
                     <div className="sidebar-header">
                         <h1>My REST App</h1>
                         {user && (
-                            <div className="user-info">
-                                Welcome, <strong>{user.name}</strong>
-                            </div>
+                            <Link to="/profile" className="user-info-link">
+                                <div className="user-info">
+                                    Welcome, <strong>{user.name || (user as any).userName || "User"}</strong>
+                                </div>
+                            </Link>
                         )}
                     </div>
                     <nav className="nav-menu">
@@ -44,13 +46,21 @@ export const Layout = () => {
                 </main>
             </div>
             <style>{`
-                .user-info {
-                    margin-top: 10px;
+            .user-info-link {
+                text-decoration: none;
+                display: block;
+                transition: transform 0.2s;
+            }
+            .user-info-link:hover {
+                transform: translateX(5px);
+            }
+            .user-info {
+                margin-top: 10px;
                     font-size: 0.85rem;
-                    color: #6b7280;
+                    color: #d1d5db;
                 }
                 .user-info strong {
-                    color: #111827;
+                    color: #fff;
                 }
                 @media (prefers-color-scheme: dark) {
                     .user-info {

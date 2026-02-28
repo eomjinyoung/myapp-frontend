@@ -26,11 +26,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         try {
             const userData = await getMe();
+            console.log("Fetched User Profile:", userData);
             setUser(userData);
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
-            // 토큰은 있지만 프로필 페치에 실패한 경우 (만료 등)
-            // refreshTokens()가 http 래퍼에서 처리되겠지만, 여기서 최종 실패하면 로그아웃 처리할 수도 있음
         } finally {
             setLoading(false);
         }
@@ -41,6 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const login = (userData: UserProfile) => {
+        console.log("Login User State Update:", userData);
         setUser(userData);
     };
 
