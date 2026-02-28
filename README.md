@@ -7,6 +7,16 @@
 - **Node.js**: v24.14 이상 (런타임 안정성 및 최신 기능 활용을 위해 권장)
 - **Package Manager**: npm (또는 pnpm/yarn)
 
+## 환경 설정
+
+이 프로젝트는 Vite 환경변수를 사용하여 API Base URL을 관리합니다.
+
+- **개발 환경**: `.env.development` (`VITE_API_BASE_URL=http://localhost:8080`)
+- **운영 환경**: `.env.production` (`VITE_API_BASE_URL=https://api.example.com`)
+
+> [!IMPORTANT]
+> 운영 환경 배포 시 `.env.production` 파일의 `VITE_API_BASE_URL` 값을 실제 API 서버 주소로 변경해야 합니다.
+
 ## 프로젝트 초기화 및 실행
 
 ```bash
