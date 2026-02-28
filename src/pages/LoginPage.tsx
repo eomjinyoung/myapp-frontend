@@ -14,8 +14,9 @@ export const LoginPage = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // openapi.json에 정의된 /auth/login 호출
-      const tokens = await http.post<TokenPair>("/auth/login", data);
+      // openapi.json에 정의된 /api/login 호출
+      // 403 에러 방지를 위해 기존 토큰(만료되었을 가능성 있음)을 헤더에 실어보내지 않도록 skipAuth: true 적용
+      const tokens = await http.post<TokenPair>("/api/login", data, { skipAuth: true });
 
       // 토큰 저장 (accessToken, refreshToken)
       setTokens(tokens);

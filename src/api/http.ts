@@ -6,6 +6,7 @@ import { ApiError } from "./errors";
 interface RequestOptions extends RequestInit {
     params?: Record<string, string>;
     _isRetry?: boolean;
+    skipAuth?: boolean;
 }
 
 /**
@@ -33,7 +34,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
     // 3. 인가 헤더 (Access Token) 자동 주입
     const token = getAccessToken();
-    if (token) {
+    if (token && !options.skipAuth) {
         headers.set("Authorization", `Bearer ${token}`);
     }
 
@@ -77,7 +78,11 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
             }
         }
 
-        const errorMessage = payload?.message || payload || `요청 실패 (Status: ${response.status})`;
+        if (response.status === 403) {
+            console.error("403 Forbidden Error Detail:", payload);
+        }
+
+        const errorMessage = payload?.message || (typeof payload === 'string' ? payload : null) || `요청 실패 (Status: ${response.status})`;
         throw new ApiError(response.status, errorMessage, payload);
     }
 
