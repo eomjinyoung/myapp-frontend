@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getPost, deletePost, type PostDetail } from "../../api/posts";
+import { useAuth } from "../../auth/AuthContext";
 
 export const PostDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,16 +51,18 @@ export const PostDetailPage = () => {
     <div className="post-detail-container">
       <div className="navigation-actions">
         <Link to="/posts" className="back-link">← Back to List</Link>
-        <div className="admin-actions">
-          <Link to={`/posts/${id}/edit`} className="edit-link">Edit</Link>
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="delete-btn"
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </button>
-        </div>
+        {user?.no === post.authorNo && (
+          <div className="admin-actions">
+            <Link to={`/posts/${id}/edit`} className="edit-link">Edit</Link>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="delete-btn"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        )}
       </div>
 
       <article className="post-content">

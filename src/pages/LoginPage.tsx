@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { setTokens } from "../auth/tokenStorage";
 import { DynamicLoginForm } from "../components/auth/DynamicLoginForm";
 import { http } from "../api/http";
+import { getMe } from "../api/user";
+import { useAuth } from "../auth/AuthContext";
 import type { TokenPair } from "../auth/types";
 
 export const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (data: any) => {
     setIsLoading(true);
@@ -20,6 +23,10 @@ export const LoginPage = () => {
 
       // 토큰 저장 (accessToken, refreshToken)
       setTokens(tokens);
+
+      // 사용자 정보 가져오기
+      const userProfile = await getMe();
+      login(userProfile);
 
       // 대시보드 이동
       navigate("/dashboard");
