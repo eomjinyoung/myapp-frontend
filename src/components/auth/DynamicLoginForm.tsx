@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchOpenAPISpec, Operation } from "../../api/openapiProvider";
+import type { Operation } from "../../api/openapiProvider";
 
 interface DynamicLoginFormProps {
     onLogin: (data: any) => void;
@@ -10,40 +10,61 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
     const [loginOp, setLoginOp] = useState<Operation | null>(null);
     const [schema, setSchema] = useState<any>(null);
     const [formData, setFormData] = useState<Record<string, string>>({});
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadSchema = async () => {
-            // 1. OpenAPI 스펙 로드
-            const response = await fetch("/openapi.json");
-            const spec = await response.json();
-
-            // 2. 로그인 엔드포인트 찾기 (가정: /auth/login)
-            const path = "/auth/login";
-            const detail = spec.paths[path]?.post;
-
-            if (detail) {
-                setLoginOp({
-                    method: "POST",
-                    path,
-                    operationId: detail.operationId,
-                    tags: detail.tags,
-                    summary: detail.summary
-                });
-
-                // 3. Schema 추출 ($ref 처리 포함)
-                const schemaRef = detail.requestBody?.content?.["application/json"]?.schema;
-                if (schemaRef?.$ref) {
-                    const schemaName = schemaRef.$ref.split("/").pop();
-                    const targetSchema = spec.components?.schemas?.[schemaName];
-                    setSchema(targetSchema);
-
-                    // 초기 데이터 세팅
-                    const initialData: any = {};
-                    Object.keys(targetSchema.properties || {}).forEach(key => {
-                        initialData[key] = "";
-                    });
-                    setFormData(initialData);
+            try {
+                console.log("Loading openapi.json...");
+                // 1. OpenAPI 스펙 로드
+                const response = await fetch("/openapi.json");
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch openapi.json: ${response.status}`);
                 }
+                const spec = await response.json();
+                console.log("OpenAPI spec loaded", spec);
+
+                // 2. 로그인 엔드포인트 찾기
+                const path = "/auth/login";
+                const detail = spec.paths?.[path]?.post;
+
+                if (detail) {
+                    setLoginOp({
+                        method: "POST",
+                        path,
+                        operationId: detail.operationId,
+                        tags: detail.tags,
+                        summary: detail.summary
+                    });
+
+                    // 3. Schema 추출
+                    const schemaRef = detail.requestBody?.content?.["application/json"]?.schema;
+                    let targetSchema = schemaRef;
+
+                    if (schemaRef?.$ref) {
+                        const schemaName = schemaRef.$ref.split("/").pop();
+                        targetSchema = spec.components?.schemas?.[schemaName];
+                    }
+
+                    if (targetSchema) {
+                        console.log("Login schema found", targetSchema);
+                        setSchema(targetSchema);
+
+                        const initialData: any = {};
+                        Object.keys(targetSchema.properties || {}).forEach(key => {
+                            initialData[key] = "";
+                        });
+                        setFormData(initialData);
+                    } else {
+                        console.warn("Login schema not found in spec");
+                    }
+                } else {
+                    console.warn("Login endpoint /auth/login not found in spec");
+                    setLoadError("로그인 인터페이스를 구성할 수 없습니다. (OpenAPI 스펙 오류)");
+                }
+            } catch (err: any) {
+                console.error("Error loading login schema:", err);
+                setLoadError(`OpenAPI 정보를 불러오지 못했습니다: ${err.message}`);
             }
         };
 
@@ -60,6 +81,7 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
         onLogin(formData);
     };
 
+    if (loadError) return <div className="error-box">{loadError}</div>;
     if (!schema) return <div>Loading login form...</div>;
 
     return (
@@ -103,6 +125,14 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
           padding: 10px;
           border: 1px solid #ddd;
           border-radius: 4px;
+        }
+        .error-box {
+          color: #ff4d4f;
+          background: #fff2f0;
+          border: 1px solid #ffccc7;
+          padding: 10px;
+          border-radius: 4px;
+          font-size: 0.9rem;
         }
       `}</style>
         </form>

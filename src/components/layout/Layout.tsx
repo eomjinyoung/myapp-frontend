@@ -30,6 +30,7 @@ export const Layout = () => {
                 </div>
                 <nav className="nav-menu">
                     <Link to="/dashboard" className="nav-item">Dashboard</Link>
+                    <Link to="/posts" className="nav-item">Posts</Link>
                     <div className="nav-section-title">API Groups</div>
                     {loading ? (
                         <div className="loading">Loading APIs...</div>

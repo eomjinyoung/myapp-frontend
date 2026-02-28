@@ -5,6 +5,10 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ApiListPage } from './pages/ApiListPage';
 import { ApiDetailPage } from './pages/ApiDetailPage';
+import { PostListPage } from './pages/posts/PostListPage';
+import { PostDetailPage } from './pages/posts/PostDetailPage';
+import { PostCreatePage } from './pages/posts/PostCreatePage';
+import { PostEditPage } from './pages/posts/PostEditPage';
 
 function App() {
   return (
@@ -17,6 +21,11 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/api/:tag" element={<ApiListPage />} />
           <Route path="/api/:tag/:operationId" element={<ApiDetailPage />} />
+
+          <Route path="/posts" element={<PostListPage />} />
+          <Route path="/posts/new" element={<PostCreatePage />} />
+          <Route path="/posts/:id" element={<PostDetailPage />} />
+          <Route path="/posts/:id/edit" element={<PostEditPage />} />
         </Route>
       </Route>
 
