@@ -1,21 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { fetchOpenAPISpec } from "../../api/openapiProvider";
-import type { TagGroup } from "../../api/openapiProvider";
 import { clearTokens, getAccessToken } from "../../auth/tokenStorage";
 
 export const Layout = () => {
-    const [tagGroups, setTagGroups] = useState<TagGroup[]>([]);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const token = getAccessToken();
-
-    useEffect(() => {
-        fetchOpenAPISpec().then((groups) => {
-            setTagGroups(groups);
-            setLoading(false);
-        });
-    }, []);
 
     const handleLogout = () => {
         clearTokens();
@@ -31,20 +19,6 @@ export const Layout = () => {
                 <nav className="nav-menu">
                     <Link to="/dashboard" className="nav-item">Dashboard</Link>
                     <Link to="/posts" className="nav-item">Posts</Link>
-                    <div className="nav-section-title">API Groups</div>
-                    {loading ? (
-                        <div className="loading">Loading APIs...</div>
-                    ) : (
-                        tagGroups.map((group) => (
-                            <Link
-                                key={group.name}
-                                to={`/api/${group.name}`}
-                                className="nav-item"
-                            >
-                                {group.name}
-                            </Link>
-                        ))
-                    )}
                 </nav>
                 <div className="sidebar-footer">
                     {token ? (
@@ -56,7 +30,7 @@ export const Layout = () => {
             </aside>
             <main className="main-content">
                 <header className="top-header">
-                    <div className="breadcrumb">API Explorer</div>
+                    <div className="breadcrumb">My Application</div>
                 </header>
                 <section className="content-area">
                     <Outlet />
