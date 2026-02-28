@@ -1,47 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setAccessToken, setRefreshToken } from "../auth/tokenStorage";
+import { setTokens } from "../auth/tokenStorage";
+import { DynamicLoginForm } from "../components/auth/DynamicLoginForm";
+import { http } from "../api/http";
+import type { TokenPair } from "../auth/types";
 
 export const LoginPage = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        // 실제 API 연동 전이므로 임시 토큰 주입
-        setAccessToken("test-access-token");
-        setRefreshToken("test-refresh-token");
-        navigate("/dashboard");
-    };
+  const handleLogin = async (data: any) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // openapi.json에 정의된 /auth/login 호출
+      const tokens = await http.post<TokenPair>("/auth/login", data);
 
-    return (
-        <div className="login-page">
-            <div className="login-card">
-                <h2>Login</h2>
-                <form onSubmit={handleLogin}>
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button type="submit">Log In</button>
-                </form>
-            </div>
-            <style>{`
+      // 토큰 저장 (accessToken, refreshToken)
+      setTokens(tokens);
+
+      // 대시보드 이동
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      setError(err.message || "로그인에 실패했습니다. 정보를 확인해 주세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <DynamicLoginForm onLogin={handleLogin} isLoading={isLoading} />
+        {error && <div className="error-message">{error}</div>}
+      </div>
+      <style>{`
         .login-page {
           display: flex;
           justify-content: center;
@@ -57,22 +52,13 @@ export const LoginPage = () => {
           width: 320px;
           color: #333;
         }
-        .form-group {
-          margin-bottom: 20px;
-        }
-        .form-group label {
-          display: block;
-          margin-bottom: 5px;
-          font-weight: bold;
-        }
-        .form-group input {
-          width: 100%;
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          box-sizing: border-box;
+        .error-message {
+          margin-top: 15px;
+          color: #ff4d4f;
+          font-size: 0.85rem;
+          text-align: center;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
