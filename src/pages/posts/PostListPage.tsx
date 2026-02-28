@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getPosts, type PostListItem } from "../../api/posts";
 
 export const PostListPage = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,20 +41,32 @@ export const PostListPage = () => {
         <div className="empty-state">No posts found. Create your first post!</div>
       ) : (
         <>
-          <div className="posts-grid">
-            {posts.map((post) => (
-              <Link key={post.no} to={`/posts/${post.no}`} className="post-card">
-                <h3>{post.title}</h3>
-                <div className="post-meta">
-                  <span>By {post.authorName || "Unknown"}</span>
-                  {post.createdAt && (
-                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                  )}
-                  <span>Views: {post.views}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <table className="posts-table">
+            <thead>
+              <tr>
+                <th className="col-no">No</th>
+                <th className="col-title">Title</th>
+                <th className="col-author">Author</th>
+                <th className="col-date">Date</th>
+                <th className="col-views">Views</th>
+              </tr>
+            </thead>
+            <tbody>
+              {posts.map((post) => (
+                <tr key={post.no} onClick={() => navigate(`/posts/${post.no}`)} className="post-row">
+                  <td className="col-no">{post.no}</td>
+                  <td className="col-title">
+                    <Link to={`/posts/${post.no}`}>{post.title}</Link>
+                  </td>
+                  <td className="col-author">{post.authorName || "Unknown"}</td>
+                  <td className="col-date">
+                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "-"}
+                  </td>
+                  <td className="col-views">{post.views}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           {totalPages > 1 && (
             <div className="pagination">
@@ -95,41 +108,43 @@ export const PostListPage = () => {
           background-color: #535bf2;
           color: white;
         }
-        .posts-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 20px;
-        }
-        .post-card {
+        
+        .posts-table {
+          width: 100%;
+          border-collapse: collapse;
           background: white;
-          padding: 20px;
           border-radius: 8px;
+          overflow: hidden;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-          text-decoration: none;
-          color: inherit;
-          display: flex;
-          flex-direction: column;
-          border: 1px solid transparent;
-          transition: border-color 0.2s, transform 0.2s;
         }
-        .post-card:hover {
-          border-color: #646cff;
-          transform: translateY(-2px);
+        .posts-table th, .posts-table td {
+          padding: 15px;
+          text-align: left;
+          border-bottom: 1px solid #f3f4f6;
         }
-        .post-card h3 {
-          margin: 0 0 10px 0;
-          font-size: 1.25rem;
-          color: #111827;
+        .posts-table th {
+          background-color: #f9fafb;
+          color: #374151;
+          font-weight: 600;
+          font-size: 0.9rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
-        .post-meta {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.8rem;
-          color: #6b7280;
-          border-top: 1px solid #f3f4f6;
-          padding-top: 10px;
-          gap: 10px;
+        .post-row {
+          cursor: pointer;
+          transition: background-color 0.2s;
         }
+        .post-row:hover {
+          background-color: #f9fafb;
+        }
+        .col-no { width: 80px; text-align: center !important; }
+        .col-title { font-weight: 500; }
+        .col-title a { color: #111827; text-decoration: none; }
+        .col-title a:hover { color: #646cff; }
+        .col-author { width: 150px; color: #4b5563; }
+        .col-date { width: 120px; color: #6b7280; font-size: 0.85rem; }
+        .col-views { width: 80px; text-align: center !important; color: #6b7280; font-size: 0.85rem; }
+
         .pagination {
           display: flex;
           justify-content: center;
@@ -157,17 +172,24 @@ export const PostListPage = () => {
         }
 
         @media (prefers-color-scheme: dark) {
-          .post-card {
+          .posts-table {
             background: #1e1e1e;
             box-shadow: 0 1px 3px rgba(0,0,0,0.4);
           }
-          .post-card h3 {
-            color: #f9fafb;
+          .posts-table th {
+            background-color: #2d2d2d;
+            color: #d1d5db;
+            border-bottom-color: #374151;
           }
-          .post-meta {
-            border-top-color: #374151;
-            color: #9ca3af;
+          .posts-table td {
+            border-bottom-color: #374151;
+            color: #d1d5db;
           }
+          .post-row:hover {
+            background-color: #2d2d2d;
+          }
+          .col-title a { color: #f9fafb; }
+          .col-title a:hover { color: #818cf8; }
           .empty-state {
             background: #1e1e1e;
           }
