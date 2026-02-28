@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/auth/login": {
+    "/api/user/password": {
         parameters: {
             query?: never;
             header?: never;
@@ -13,15 +13,18 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** User Login */
-        post: operations["login"];
+        /**
+         * 비밀번호 변경
+         * @description 로그인된 사용자의 비밀번호를 변경합니다.
+         */
+        post: operations["changePassword"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/reissue": {
+    "/api/signup": {
         parameters: {
             query?: never;
             header?: never;
@@ -30,7 +33,30 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Token reissue */
+        /**
+         * 회원가입
+         * @description 새로운 사용자를 등록합니다.
+         */
+        post: operations["signup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reissue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 토큰 재발급
+         * @description 리프레시 토큰을 사용하여 새로운 액세스 토큰과 리프레시 토큰을 발급받습니다.
+         */
         post: operations["reissue"];
         delete?: never;
         options?: never;
@@ -38,38 +64,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/posts": {
+    "/api/posts": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List all posts */
-        get: operations["getPosts"];
+        /**
+         * 게시글 목록 조회
+         * @description 페이징 처리된 게시글 목록을 조회합니다.
+         */
+        get: operations["list"];
         put?: never;
-        /** Create a new post */
-        post: operations["createPost"];
+        /**
+         * 게시글 등록
+         * @description 새로운 게시글을 등록합니다.
+         */
+        post: operations["add"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/posts/{id}": {
+    "/api/logout": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get post details */
-        get: operations["getPost"];
-        /** Update an existing post */
-        put: operations["updatePost"];
+        get?: never;
+        put?: never;
+        /**
+         * 로그아웃
+         * @description 현재 사용자를 로그아웃 처리하고 토큰을 무효화합니다.
+         */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 로그인
+         * @description 이메일과 비밀번호로 로그인하여 토큰을 발급받습니다.
+         */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/posts/{no}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 게시글 상세 조회
+         * @description 특정 번호의 게시글 상세 정보를 조회합니다.
+         */
+        get: operations["detail"];
+        put?: never;
         post?: never;
-        /** Delete a post */
-        delete: operations["deletePost"];
+        /**
+         * 게시글 삭제
+         * @description 특정 게시글을 삭제합니다.
+         */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        /**
+         * 게시글 수정
+         * @description 기존 게시글을 수정합니다. 부분 업데이트(PATCH)를 지원합니다.
+         */
+        patch: operations["update"];
+        trace?: never;
+    };
+    "/api/user/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 현재 사용자 정보 조회
+         * @description 현재 로그인된 사용자의 상세 정보를 조회합니다.
+         */
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/hello": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["hello"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -79,34 +196,258 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        LoginRequest: {
-            /** @description Username or Email */
-            username: string;
-            /** Format: password */
+        /** @description 비밀번호 변경 요청 객체 */
+        PasswordChangeDto: {
+            /**
+             * @description 현재 비밀번호
+             * @example 1234
+             */
+            currentPassword: string;
+            /**
+             * @description 새 비밀번호
+             * @example 5678
+             */
+            newPassword: string;
+            /**
+             * @description 새 비밀번호 확인
+             * @example 5678
+             */
+            newPasswordConfirm: string;
+            newPasswordMatching?: boolean;
+        };
+        /** @description 공통 에러 응답 객체 */
+        ErrorResponseDto: {
+            /**
+             * @description 에러 메시지
+             * @example 잘못된 요청입니다.
+             */
+            message?: string;
+            /**
+             * Format: int32
+             * @description HTTP 상태 코드
+             * @example 400
+             */
+            status?: number;
+        };
+        /** @description 회원가입 요청 객체 */
+        UserSignupDto: {
+            /**
+             * @description 이름
+             * @example 홍길동
+             */
+            name: string;
+            /**
+             * Format: email
+             * @description 이메일
+             * @example user@example.com
+             */
+            email: string;
+            /**
+             * @description 비밀번호
+             * @example 1234
+             */
+            password: string;
+            /**
+             * @description 비밀번호 확인
+             * @example 1234
+             */
+            passwordConfirm: string;
+            passwordMatching?: boolean;
+        };
+        /** @description 토큰 재발급 요청 객체 */
+        TokenReissueRequestDto: {
+            /** @description 기존 리프레시 토큰 */
+            refreshToken: string;
+        };
+        /** @description 로그인 응답 객체 */
+        LoginResponseDto: {
+            /** @description 액세스 토큰 */
+            accessToken: string;
+            /**
+             * @description 토큰 타입
+             * @example Bearer
+             */
+            tokenType: string;
+            /**
+             * @description 사용자 이름
+             * @example 홍길동
+             */
+            userName: string;
+            /** @description 리프레시 토큰 */
+            refreshToken: string;
+        };
+        /** @description 게시글 생성을 위한 요청 객체 */
+        PostCreateDto: {
+            /**
+             * @description 게시글 제목
+             * @example 안녕하세요
+             */
+            title: string;
+            /**
+             * @description 게시글 내용
+             * @example 만나서 반갑습니다.
+             */
+            content?: string;
+            /**
+             * @description 해시태그 (쉼표로 구분)
+             * @example 인사,반가움
+             */
+            tags?: string;
+        };
+        /** @description 로그인 요청 객체 */
+        LoginRequestDto: {
+            /**
+             * Format: email
+             * @description 사용자 이메일
+             * @example user@example.com
+             */
+            email: string;
+            /**
+             * @description 사용자 비밀번호
+             * @example 1234
+             */
             password: string;
         };
-        TokenPair: {
-            accessToken?: string;
-            refreshToken?: string;
-        };
-        User: {
-            /** Format: int64 */
-            id?: number;
-            email?: string;
-            name?: string;
-        };
-        Post: {
-            /** Format: int64 */
-            id?: number;
-            title?: string;
-            content?: string;
-            author?: components["schemas"]["User"];
-            /** Format: date-time */
-            createdAt?: string;
-        };
-        PostRequest: {
+        /** @description 게시글 수정을 위한 요청 객체 */
+        PostUpdateDto: {
+            /**
+             * Format: int64
+             * @description 게시글 번호 (Path Variable로 전달 시 생략 가능)
+             * @example 1
+             */
+            no?: number;
+            /**
+             * @description 변경할 제목
+             * @example 새로운 제목
+             */
             title: string;
-            content: string;
+            /**
+             * @description 변경할 내용
+             * @example 새로운 내용
+             */
+            content?: string;
+            /**
+             * @description 변경할 태그 (쉼표로 구분)
+             * @example 태그1,태그2
+             */
+            tags?: string;
+        };
+        /** @description 사용자 정보 응답 객체 */
+        UserResponseDto: {
+            /**
+             * Format: int64
+             * @description 사용자 번호
+             * @example 1
+             */
+            no?: number;
+            /**
+             * @description 이름
+             * @example 홍길동
+             */
+            name?: string;
+            /**
+             * @description 이메일
+             * @example user@example.com
+             */
+            email?: string;
+        };
+        /** @description 게시글 목록 항목 응답 객체 */
+        PostListDto: {
+            /**
+             * Format: int64
+             * @description 게시글 번호
+             * @example 1
+             */
+            no?: number;
+            /**
+             * @description 제목
+             * @example 제목입니다
+             */
+            title?: string;
+            /**
+             * Format: date-time
+             * @description 생성 일시
+             */
+            createdAt?: string;
+            /**
+             * Format: int32
+             * @description 조회수
+             * @example 5
+             */
+            views?: number;
+            /**
+             * @description 작성자 이름
+             * @example 홍길동
+             */
+            authorName?: string;
+        };
+        /** @description 페이징 처리된 게시글 목록 응답 객체 */
+        PostListResponseDto: {
+            /** @description 게시글 목록 */
+            posts?: components["schemas"]["PostListDto"][];
+            /**
+             * Format: int32
+             * @description 현재 페이지 번호
+             * @example 1
+             */
+            currentPage?: number;
+            /**
+             * Format: int32
+             * @description 전체 페이지 수
+             * @example 10
+             */
+            totalPages?: number;
+        };
+        /** @description 게시글 상세 정보 응답 객체 */
+        PostResponseDto: {
+            /**
+             * Format: int64
+             * @description 게시글 번호
+             * @example 1
+             */
+            no?: number;
+            /**
+             * @description 제목
+             * @example 제목입니다
+             */
+            title?: string;
+            /**
+             * @description 내용
+             * @example 내용입니다
+             */
+            content?: string;
+            /**
+             * Format: date-time
+             * @description 생성 일시
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @description 수정 일시
+             */
+            updatedAt?: string;
+            /**
+             * Format: int32
+             * @description 조회수
+             * @example 10
+             */
+            views?: number;
+            /**
+             * @description 태그 리스트 (쉼표로 구분)
+             * @example java,spring
+             */
+            tags?: string;
+            /**
+             * @description 작성자 이름
+             * @example 홍길동
+             */
+            authorName?: string;
+            /**
+             * Format: int64
+             * @description 작성자 번호
+             * @example 1
+             */
+            authorNo?: number;
         };
     };
     responses: never;
@@ -117,7 +458,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    login: {
+    changePassword: {
         parameters: {
             query?: never;
             header?: never;
@@ -126,17 +467,91 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginRequest"];
+                "application/json": components["schemas"]["PasswordChangeDto"];
             };
         };
         responses: {
-            /** @description Login Successful */
+            /** @description 비밀번호 변경 성공 */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
+                content?: never;
+            };
+            /** @description 잘못된 입력값 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": components["schemas"]["TokenPair"];
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    signup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserSignupDto"];
+            };
+        };
+        responses: {
+            /** @description 회원가입 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 잘못된 입력값 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 요청 제한 초과 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
                 };
             };
         };
@@ -148,11 +563,459 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
-                "application/json": components["schemas"]["TokenPair"];
+                "application/json": components["schemas"]["TokenReissueRequestDto"];
             };
         };
+        responses: {
+            /** @description 재발급 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponseDto"];
+                };
+            };
+            /** @description 유효하지 않거나 만료된 리프레시 토큰 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                /** @description 페이지 번호 (1부터 시작) */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PostListResponseDto"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 요청 제한 초과 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostCreateDto"];
+            };
+        };
+        responses: {
+            /** @description 등록 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 로그아웃 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequestDto"];
+            };
+        };
+        responses: {
+            /** @description 로그인 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+            /** @description 인증 실패 (이메일 또는 비밀번호 불일치) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 계정 잠금 상태 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 요청 제한 초과 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 게시글 번호 */
+                no: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PostResponseDto"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 게시글을 찾을 수 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 삭제할 게시글 번호 */
+                no: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 삭제 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 게시글을 찾을 수 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 수정할 게시글 번호 */
+                no: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostUpdateDto"];
+            };
+        };
+        responses: {
+            /** @description 수정 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 잘못된 요청 (ID 불일치 등) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 게시글을 찾을 수 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserResponseDto"];
+                };
+            };
+            /** @description 인증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description 서버 에러 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    hello: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -160,120 +1023,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TokenPair"];
+                    "*/*": string;
                 };
-            };
-        };
-    };
-    getPosts: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Post"][];
-                };
-            };
-        };
-    };
-    createPost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PostRequest"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Post"];
-                };
-            };
-        };
-    };
-    getPost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Post"];
-                };
-            };
-        };
-    };
-    updatePost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PostRequest"];
-            };
-        };
-        responses: {
-            /** @description Updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Post"];
-                };
-            };
-        };
-    };
-    deletePost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

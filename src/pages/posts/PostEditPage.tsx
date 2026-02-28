@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getPost, updatePost, type PostRequest } from "../../api/posts";
+import { getPost, updatePost, type PostUpdateRequest } from "../../api/posts";
 import { PostForm } from "../../components/posts/PostForm";
 
 export const PostEditPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [initialData, setInitialData] = useState<{ title: string, content: string } | null>(null);
+    const [initialData, setInitialData] = useState<{ title: string, content: string, tags?: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,8 @@ export const PostEditPage = () => {
                 const post = await getPost(Number(id));
                 setInitialData({
                     title: post.title || "",
-                    content: post.content || ""
+                    content: post.content || "",
+                    tags: post.tags
                 });
             } catch (err: any) {
                 console.error("Failed to fetch post for edit:", err);
@@ -30,12 +31,12 @@ export const PostEditPage = () => {
         fetchPost();
     }, [id]);
 
-    const handleSubmit = async (data: PostRequest) => {
+    const handleSubmit = async (data: PostUpdateRequest) => {
         if (!id) return;
         setIsLoading(true);
         setError(null);
         try {
-            await updatePost(Number(id), data);
+            await updatePost(Number(id), { ...data, no: Number(id) });
             navigate(`/posts/${id}`);
         } catch (err: any) {
             console.error("Failed to update post:", err);

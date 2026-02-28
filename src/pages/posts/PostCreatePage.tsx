@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPost, type PostRequest } from "../../api/posts";
+import { createPost, type PostCreateRequest } from "../../api/posts";
 import { PostForm } from "../../components/posts/PostForm";
 
 export const PostCreatePage = () => {
@@ -8,12 +8,13 @@ export const PostCreatePage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (data: PostRequest) => {
+    const handleSubmit = async (data: PostCreateRequest) => {
         setIsLoading(true);
         setError(null);
         try {
-            const newPost = await createPost(data);
-            navigate(`/posts/${newPost.id}`);
+            await createPost(data);
+            // 백엔드가 생성된 객체를 주지 않거나 ID를 모를 경우 목록으로 이동
+            navigate("/posts");
         } catch (err: any) {
             console.error("Failed to create post:", err);
             setError("게시물 등록에 실패했습니다. " + (err.message || ""));

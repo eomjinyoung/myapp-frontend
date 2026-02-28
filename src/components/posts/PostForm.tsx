@@ -1,68 +1,80 @@
 import React, { useState, useEffect } from "react";
-import type { PostRequest } from "../../api/posts";
 
 interface PostFormProps {
-    initialData?: { title: string; content: string };
-    onSubmit: (data: PostRequest) => void;
-    isLoading: boolean;
-    submitLabel: string;
+  initialData?: { title: string; content: string; tags?: string };
+  onSubmit: (data: { title: string; content: string; tags?: string }) => void;
+  isLoading: boolean;
+  submitLabel: string;
 }
 
 export const PostForm: React.FC<PostFormProps> = ({
-    initialData,
-    onSubmit,
-    isLoading,
-    submitLabel
+  initialData,
+  onSubmit,
+  isLoading,
+  submitLabel
 }) => {
-    const [title, setTitle] = useState(initialData?.title || "");
-    const [content, setContent] = useState(initialData?.content || "");
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [content, setContent] = useState(initialData?.content || "");
+  const [tags, setTags] = useState(initialData?.tags || "");
 
-    useEffect(() => {
-        if (initialData) {
-            setTitle(initialData.title);
-            setContent(initialData.content);
-        }
-    }, [initialData]);
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setContent(initialData.content);
+      setTags(initialData.tags || "");
+    }
+  }, [initialData]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!title.trim() || !content.trim()) return;
-        onSubmit({ title, content });
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim()) return;
+    onSubmit({ title, content, tags });
+  };
 
-    return (
-        <form onSubmit={handleSubmit} className="post-form">
-            <div className="form-group">
-                <label htmlFor="title">Title</label>
-                <input
-                    id="title"
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    placeholder="Enter post title"
-                    disabled={isLoading}
-                />
-            </div>
-            <div className="form-group">
-                <label htmlFor="content">Content</label>
-                <textarea
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                    placeholder="Enter post content"
-                    rows={10}
-                    disabled={isLoading}
-                />
-            </div>
-            <div className="form-actions">
-                <button type="submit" disabled={isLoading} className="submit-btn">
-                    {isLoading ? "Saving..." : submitLabel}
-                </button>
-            </div>
+  return (
+    <form onSubmit={handleSubmit} className="post-form">
+      <div className="form-group">
+        <label htmlFor="title">Title</label>
+        <input
+          id="title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          placeholder="Enter post title"
+          disabled={isLoading}
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="tags">Tags (comma separated)</label>
+        <input
+          id="tags"
+          type="text"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          placeholder="e.g. java, spring, react"
+          disabled={isLoading}
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="content">Content</label>
+        <textarea
+          id="content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+          placeholder="Enter post content"
+          rows={10}
+          disabled={isLoading}
+        />
+      </div>
+      <div className="form-actions">
+        <button type="submit" disabled={isLoading} className="submit-btn">
+          {isLoading ? "Saving..." : submitLabel}
+        </button>
+      </div>
 
-            <style>{`
+      <style>{`
         .post-form {
           display: flex;
           flex-direction: column;
@@ -90,7 +102,6 @@ export const PostForm: React.FC<PostFormProps> = ({
         .form-group input:focus, .form-group textarea:focus {
           outline: none;
           border-color: #646cff;
-          ring: 2px solid #646cff22;
         }
         .submit-btn {
           background-color: #646cff;
@@ -122,6 +133,6 @@ export const PostForm: React.FC<PostFormProps> = ({
           }
         }
       `}</style>
-        </form>
-    );
+    </form>
+  );
 };

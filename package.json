@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "openapi:pull": "curl -s http://localhost:8080/v3/api-docs -o openapi.json",
+    "openapi:pull": "curl -s http://localhost:8080/v3/api-docs -o public/openapi.json",
     "openapi:types": "openapi-typescript public/openapi.json -o src/types/openapi.ts"
   },
   "dependencies": {

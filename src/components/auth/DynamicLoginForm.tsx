@@ -25,7 +25,7 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
                 console.log("OpenAPI spec loaded", spec);
 
                 // 2. 로그인 엔드포인트 찾기
-                const path = "/auth/login";
+                const path = "/api/auth/login";
                 const detail = spec.paths?.[path]?.post;
 
                 if (detail) {

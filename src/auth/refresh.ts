@@ -24,7 +24,7 @@ export async function refreshTokens(): Promise<TokenPair> {
 
     refreshPromise = (async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/reissue`, {
+            const response = await fetch(`${API_BASE_URL}/api/auth/reissue`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
