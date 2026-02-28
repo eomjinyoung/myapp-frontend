@@ -25,7 +25,7 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
                 console.log("OpenAPI spec loaded", spec);
 
                 // 2. 로그인 엔드포인트 찾기
-                const path = "/api/auth/login";
+                const path = "/api/login";
                 const detail = spec.paths?.[path]?.post;
 
                 if (detail) {
@@ -59,7 +59,7 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
                         console.warn("Login schema not found in spec");
                     }
                 } else {
-                    console.warn("Login endpoint /auth/login not found in spec");
+                    console.warn("Login endpoint /api/login not found in spec");
                     setLoadError("로그인 인터페이스를 구성할 수 없습니다. (OpenAPI 스펙 오류)");
                 }
             } catch (err: any) {
