@@ -14,7 +14,7 @@ export const PostListPage = () => {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const response = await getPosts(currentPage);
+        const response = await getPosts(currentPage, 5);
         setPosts(response.posts || []);
         setTotalPages(response.totalPages || 1);
       } catch (err: any) {

@@ -10,8 +10,8 @@ export type PostListResponse = components["schemas"]["PostListResponseDto"];
 /**
  * 게시물 목록 조회 (페이징 포함)
  */
-export const getPosts = async (page: number = 1): Promise<PostListResponse> => {
-    return http.get<PostListResponse>("/api/posts", { params: { page: String(page) } });
+export const getPosts = async (page: number = 1, size: number = 10): Promise<PostListResponse> => {
+    return http.get<PostListResponse>("/api/posts", { params: { page: String(page), size: String(size) } });
 };
 
 /**
