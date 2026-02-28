@@ -1,16 +1,18 @@
 import { API_BASE_URL } from "../config/env";
-import { getAccessToken } from "../auth/tokenStorage";
+import { getAccessToken, getRefreshToken, clearTokens } from "../auth/tokenStorage";
+import { refreshTokens } from "../auth/refresh";
 import { ApiError } from "./errors";
 
 interface RequestOptions extends RequestInit {
     params?: Record<string, string>;
+    _isRetry?: boolean;
 }
 
 /**
  * Fetch API 기반 공통 request 래퍼
  */
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-    const { params, headers: customHeaders, body, ...restOptions } = options;
+    const { params, headers: customHeaders, body, _isRetry, ...restOptions } = options;
 
     // 1. URL 구성 (Query Parameters 처리)
     const url = new URL(path, API_BASE_URL);
@@ -54,8 +56,27 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
         payload = await response.text();
     }
 
-    // 6. 에러 처리 (2xx가 아닌 경우)
+    // 6. 에러 처리 및 401 재발급 로직
     if (!response.ok) {
+        // 401 Unauthorized 발생 시 토큰 재시도 로직
+        if (response.status === 401 && !_isRetry) {
+            const refreshToken = getRefreshToken();
+
+            if (refreshToken) {
+                try {
+                    // 토큰 재발급 시도 (Single Flight 처리됨)
+                    await refreshTokens();
+
+                    // 성공 시 원래 요청 1회 재시도 (_isRetry: true)
+                    return request<T>(path, { ...options, _isRetry: true });
+                } catch (refreshError) {
+                    // 재발급 실패 시 토큰 비우고 에러 던짐
+                    clearTokens();
+                    throw new ApiError(401, "세션이 만료되었습니다. 다시 로그인해 주세요.", payload);
+                }
+            }
+        }
+
         const errorMessage = payload?.message || payload || `요청 실패 (Status: ${response.status})`;
         throw new ApiError(response.status, errorMessage, payload);
     }
