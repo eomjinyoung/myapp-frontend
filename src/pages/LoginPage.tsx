@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { setTokens } from "../auth/tokenStorage";
-import { DynamicLoginForm } from "../components/auth/DynamicLoginForm";
+import { DynamicAuthForm } from "../components/auth/DynamicAuthForm";
 import { http } from "../api/http";
 import { getMe } from "../api/user";
 import { useAuth } from "../auth/AuthContext";
@@ -41,8 +41,17 @@ export const LoginPage = () => {
   return (
     <div className="login-page">
       <div className="login-card">
-        <DynamicLoginForm onLogin={handleLogin} isLoading={isLoading} />
+        <DynamicAuthForm
+          title="Login"
+          endpoint="/api/login"
+          onSubmit={handleLogin}
+          isLoading={isLoading}
+          submitLabel="Login"
+        />
         {error && <div className="error-message">{error}</div>}
+        <div className="auth-footer">
+          Don't have an account? <Link to="/signup">Sign up</Link>
+        </div>
       </div>
       <style>{`
         .login-page {
@@ -65,6 +74,17 @@ export const LoginPage = () => {
           color: #ff4d4f;
           font-size: 0.85rem;
           text-align: center;
+        }
+        .auth-footer {
+          margin-top: 20px;
+          text-align: center;
+          font-size: 0.9rem;
+          color: #666;
+        }
+        .auth-footer a {
+          color: #646cff;
+          text-decoration: none;
+          font-weight: 600;
         }
       `}</style>
     </div>

@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { PrivateRoute } from './components/auth/PrivateRoute';
 import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PostListPage } from './pages/posts/PostListPage';
 import { PostDetailPage } from './pages/posts/PostDetailPage';
@@ -12,6 +13,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<PrivateRoute />}>
         <Route element={<Layout />}>

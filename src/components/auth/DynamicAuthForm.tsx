@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from "react";
 import type { Operation } from "../../api/openapiProvider";
 
-interface DynamicLoginFormProps {
-    onLogin: (data: any) => void;
+interface DynamicAuthFormProps {
+    title?: string;
+    endpoint: string;
+    onSubmit: (data: any) => void;
     isLoading: boolean;
+    submitLabel: string;
 }
 
-export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isLoading }) => {
-    const [loginOp, setLoginOp] = useState<Operation | null>(null);
+export const DynamicAuthForm: React.FC<DynamicAuthFormProps> = ({
+    title,
+    endpoint,
+    onSubmit,
+    isLoading,
+    submitLabel
+}) => {
+    const [op, setOp] = useState<Operation | null>(null);
     const [schema, setSchema] = useState<any>(null);
     const [formData, setFormData] = useState<Record<string, string>>({});
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -15,23 +24,20 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
     useEffect(() => {
         const loadSchema = async () => {
             try {
-                console.log("Loading openapi.json...");
                 // 1. OpenAPI 스펙 로드
                 const response = await fetch("/openapi.json");
                 if (!response.ok) {
                     throw new Error(`Failed to fetch openapi.json: ${response.status}`);
                 }
                 const spec = await response.json();
-                console.log("OpenAPI spec loaded", spec);
 
-                // 2. 로그인 엔드포인트 찾기
-                const path = "/api/login";
-                const detail = spec.paths?.[path]?.post;
+                // 2. 엔드포인트 찾기
+                const detail = spec.paths?.[endpoint]?.post;
 
                 if (detail) {
-                    setLoginOp({
+                    setOp({
                         method: "POST",
-                        path,
+                        path: endpoint,
                         operationId: detail.operationId,
                         tags: detail.tags,
                         summary: detail.summary
@@ -47,7 +53,6 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
                     }
 
                     if (targetSchema) {
-                        console.log("Login schema found", targetSchema);
                         setSchema(targetSchema);
 
                         const initialData: any = {};
@@ -56,20 +61,20 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
                         });
                         setFormData(initialData);
                     } else {
-                        console.warn("Login schema not found in spec");
+                        console.warn(`Schema not found for ${endpoint} in spec`);
                     }
                 } else {
-                    console.warn("Login endpoint /api/login not found in spec");
-                    setLoadError("로그인 인터페이스를 구성할 수 없습니다. (OpenAPI 스펙 오류)");
+                    console.warn(`Endpoint ${endpoint} not found in spec`);
+                    setLoadError(`인터페이스를 구성할 수 없습니다. (OpenAPI 스펙 오류: ${endpoint})`);
                 }
             } catch (err: any) {
-                console.error("Error loading login schema:", err);
+                console.error(`Error loading schema for ${endpoint}:`, err);
                 setLoadError(`OpenAPI 정보를 불러오지 못했습니다: ${err.message}`);
             }
         };
 
         loadSchema();
-    }, []);
+    }, [endpoint]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -78,31 +83,36 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onLogin(formData);
+        onSubmit(formData);
     };
 
     if (loadError) return <div className="error-box">{loadError}</div>;
-    if (!schema) return <div>Loading login form...</div>;
+    if (!schema) return <div>Loading form...</div>;
 
     return (
         <form onSubmit={handleSubmit} className="dynamic-form">
-            <h3>{loginOp?.summary || "Login"}</h3>
-            {Object.entries(schema.properties || {}).map(([key, prop]: [string, any]) => (
-                <div key={key} className="form-group">
-                    <label htmlFor={key}>{prop.description || key}</label>
-                    <input
-                        id={key}
-                        name={key}
-                        type={prop.format === "password" ? "password" : "text"}
-                        value={formData[key] || ""}
-                        onChange={handleChange}
-                        required={schema.required?.includes(key)}
-                        placeholder={`Enter your ${key}`}
-                    />
-                </div>
-            ))}
-            <button type="submit" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+            <h3>{title || op?.summary || "Authentication"}</h3>
+            {Object.entries(schema.properties || {}).map(([key, prop]: [string, any]) => {
+                // passwordMatching 같은 필드는 UI에서 제외 (서버측 검증용일 가능성 큼)
+                if (key === 'passwordMatching') return null;
+
+                return (
+                    <div key={key} className="form-group">
+                        <label htmlFor={key}>{prop.description || key}</label>
+                        <input
+                            id={key}
+                            name={key}
+                            type={key.toLowerCase().includes("password") ? "password" : (prop.format === "email" ? "email" : "text")}
+                            value={formData[key] || ""}
+                            onChange={handleChange}
+                            required={schema.required?.includes(key)}
+                            placeholder={`Enter ${prop.description || key}`}
+                        />
+                    </div>
+                );
+            })}
+            <button type="submit" disabled={isLoading} className="submit-btn">
+                {isLoading ? "Processing..." : submitLabel}
             </button>
 
             <style>{`
@@ -119,12 +129,24 @@ export const DynamicLoginForm: React.FC<DynamicLoginFormProps> = ({ onLogin, isL
         .form-group label {
           font-size: 0.9rem;
           font-weight: bold;
-          text-transform: capitalize;
+          text-align: left;
         }
         .form-group input {
           padding: 10px;
           border: 1px solid #ddd;
           border-radius: 4px;
+        }
+        .submit-btn {
+          margin-top: 10px;
+          background-color: #646cff;
+          color: white;
+          padding: 12px;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .submit-btn:hover {
+          background-color: #535bf2;
         }
         .error-box {
           color: #ff4d4f;
