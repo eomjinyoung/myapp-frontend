@@ -15,21 +15,21 @@ The API uses **JWT (JSON Web Token)** based authentication.
 ### Authentication & User
 | Method | Path | Summary | Auth Required |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/login` | 로그인 | No |
-| `POST` | `/api/auth/reissue` | 토큰 재발급 | No |
-| `POST` | `/api/auth/signup` | 회원가입 | No |
-| `POST` | `/api/auth/logout` | 로그아웃 | Yes |
+| `POST` | `/api/login` | 로그인 | No |
+| `POST` | `/api/reissue` | 토큰 재발급 | No |
+| `POST` | `/api/signup` | 회원가입 | No |
+| `POST` | `/api/logout` | 로그아웃 | Yes |
 | `GET` | `/api/user/me` | 현재 사용자 정보 조회 | Yes |
 | `POST` | `/api/user/password` | 비밀번호 변경 | Yes |
 
 ### Post (게시글)
 | Method | Path | Summary | Auth Required |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/post/list` | 게시글 목록 조회 | No |
-| `GET` | `/api/post/{no}` | 게시글 상세 조회 | No |
-| `POST` | `/api/post` | 게시글 생성 | Yes |
-| `DELETE` | `/api/post/{no}` | 게시글 삭제 | Yes |
-| `PATCH` | `/api/post/{no}` | 게시글 수정 | Yes |
+| `GET` | `/api/posts` | 게시글 목록 조회 | No |
+| `GET` | `/api/posts/{no}` | 게시글 상세 조회 | No |
+| `POST` | `/api/posts` | 게시글 등록 | Yes |
+| `DELETE` | `/api/posts/{no}` | 게시글 삭제 | Yes |
+| `PATCH` | `/api/posts/{no}` | 게시글 수정 | Yes |
 
 ### Other
 | Method | Path | Summary | Auth Required |
@@ -54,6 +54,6 @@ The API uses **JWT (JSON Web Token)** based authentication.
 - **ErrorResponseDto**: `message`, `status`
 
 ## 4. Logical Grouping
-- **Auth Flow**: `/api/auth/login` -> `/api/auth/logout` / `/api/auth/reissue`
-- **User Management**: `/api/auth/signup`, `/api/user/me`, `/api/user/password`
-- **Content Flow**: `/api/post/list` -> `/api/post/{no}` -> `/api/post` (create)
+- **Auth Flow**: `/api/login` -> `/api/logout` / `/api/reissue`
+- **User Management**: `/api/signup`, `/api/user/me`, `/api/user/password`
+- **Content Flow**: `/api/posts` -> `/api/posts/{no}` -> `/api/posts` (create)
