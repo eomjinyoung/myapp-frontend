@@ -12,7 +12,6 @@ export const authApi = {
 
         const result = await handleResponse<LoginResponse>(response);
         tokenStorage.setAccessToken(result.accessToken);
-        tokenStorage.setRefreshToken(result.refreshToken);
         return result;
     },
 
@@ -29,11 +28,11 @@ export const authApi = {
         await handleResponse<void>(response);
     },
 
-    refreshAccessToken: async (refreshToken: string): Promise<TokenReissueResponse> => {
+    refreshAccessToken: async (): Promise<TokenReissueResponse> => {
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/reissue`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken }),
+            credentials: 'include',
         });
         return handleResponse<TokenReissueResponse>(response);
     },

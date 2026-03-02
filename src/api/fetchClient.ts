@@ -41,41 +41,30 @@ export const fetchClient = async (
         headers.set('Authorization', `Bearer ${accessToken}`);
     }
 
-    const response = await fetch(url, { ...options, headers });
+    const response = await fetch(url, { ...options, headers, credentials: 'include' });
 
     if (response.status === 401) {
-        const refreshToken = tokenStorage.getRefreshToken();
-
-        if (!refreshToken) {
-            handleTokenExpired();
-            return response;
-        }
-
         if (!isRefreshing) {
             isRefreshing = true;
             try {
                 const reissueResponse = await fetch(`${baseUrl}/api/reissue`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ refreshToken }),
+                    credentials: 'include',
                 });
 
                 if (reissueResponse.ok) {
                     const data = await handleResponse<any>(reissueResponse);
                     const newAccessToken = data.accessToken;
-                    const newRefreshToken = data.refreshToken;
 
                     tokenStorage.setAccessToken(newAccessToken);
-                    if (newRefreshToken) {
-                        tokenStorage.setRefreshToken(newRefreshToken);
-                    }
 
                     onRefreshed(newAccessToken);
                     isRefreshing = false;
 
                     // Retry the original request
                     headers.set('Authorization', `Bearer ${newAccessToken}`);
-                    return fetch(url, { ...options, headers });
+                    return fetch(url, { ...options, headers, credentials: 'include' });
                 } else {
                     handleTokenExpired();
                     return response;
@@ -90,7 +79,7 @@ export const fetchClient = async (
         return new Promise((resolve) => {
             addRefreshSubscriber((token) => {
                 headers.set('Authorization', `Bearer ${token}`);
-                resolve(fetch(url, { ...options, headers }));
+                resolve(fetch(url, { ...options, headers, credentials: 'include' }));
             });
         });
     }
