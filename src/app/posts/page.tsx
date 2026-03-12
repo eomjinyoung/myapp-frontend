@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Eye, ChevronLeft, ChevronRight, User, CalendarDays } from 'lucide-react'
+import { Eye, ChevronLeft, ChevronRight, User, CalendarDays, PenSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button-variants'
 
@@ -53,6 +53,13 @@ export default async function PostsPage({
             <h1 className="text-3xl font-bold tracking-tight">게시글 목록</h1>
             <p className="text-muted-foreground mt-1 text-sm">총 {data.posts.length}개의 게시글이 있습니다.</p>
           </div>
+          <Link
+            href="/posts/new"
+            className={cn(buttonVariants({ variant: 'default' }), 'gap-2')}
+          >
+            <PenSquare className="size-4" />
+            글쓰기
+          </Link>
         </div>
 
         {/* 게시글 목록 Table */}

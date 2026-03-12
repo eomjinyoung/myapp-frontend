@@ -36,7 +36,7 @@ export interface Post {
 /**
  * PostCreateDto
  */
-export interface PostCreateRequest {
+export interface CreatePostRequest {
   title: string
   content: string
   tags: string
@@ -45,7 +45,7 @@ export interface PostCreateRequest {
 /**
  * PostUpdateDto
  */
-export interface PostUpdateRequest {
+export interface UpdatePostRequest {
   title: string
   content: string
   tags: string
