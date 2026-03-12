@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { apiFetch } from '@/lib/api'
 import { RegisterRequest } from '@/types/auth'
-import { ApiError } from '@/types/api'
 import { toast } from 'sonner'
 
 export default function RegisterPage() {
@@ -40,11 +40,8 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/signup`, {
+      await apiFetch('/api/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -53,15 +50,10 @@ export default function RegisterPage() {
         }),
       })
 
-      if (!response.ok) {
-        const errorData: ApiError = await response.json()
-        throw new Error(errorData.message || '회원가입에 실패했습니다.')
-      }
-
       toast.success('회원가입이 완료되었습니다. 로그인해 주세요.')
       router.push('/login')
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || '회원가입에 실패했습니다.')
     } finally {
       setIsLoading(false)
     }

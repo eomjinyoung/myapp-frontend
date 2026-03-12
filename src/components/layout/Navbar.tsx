@@ -70,7 +70,7 @@ export const Navbar = () => {
                   로그인
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/register"
                   className={cn(buttonVariants({ size: 'sm' }), 'gap-1.5')}
                 >
                   <UserPlus className="h-4 w-4" />
