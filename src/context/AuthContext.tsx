@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (credentials: LoginRequest) => {
     try {
-      const data = await post<LoginResponse>("/api/auth/login", credentials);
+      const data = await post<LoginResponse>("/api/login", credentials);
       setAccessToken(data.accessToken);
       await fetchUser(data.accessToken);
     } catch (error) {

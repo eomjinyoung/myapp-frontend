@@ -24,14 +24,11 @@ export async function apiFetch<T>(
     headers,
   });
 
-  if (response.status === 401 && url !== "/api/auth/refresh") {
+  if (response.status === 401 && url !== "/api/login" && url !== "/api/signup") {
     try {
-      // 1. Refresh Access Token
-      const refreshResponse = await fetch(`${BASE_URL}/api/auth/refresh`, {
+      // 1. Refresh Access Token via local proxy
+      const refreshResponse = await fetch("/api/auth/refresh", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
 
       if (refreshResponse.ok) {

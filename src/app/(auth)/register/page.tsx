@@ -40,7 +40,7 @@ export default function RegisterPage() {
     };
 
     try {
-      await post("/api/auth/signup", payload);
+      await post("/api/signup", payload);
       router.push("/login");
     } catch (err: any) {
       setError(err.message || "회원가입에 실패했습니다.");

@@ -1,6 +1,6 @@
 # REST API 문서
 
-이 문서는 애플리케이션에서 사용 가능한 REST API 엔드포인트에 대해 설명합니다.
+이 문서는 애플리케이션에서 사용 가능한 REST API 엔드포인트에 대해 설명합니다. (OpenAPI 3.1.0 기준 업데이트)
 
 ## 인증
 API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요청 시 `Authorization: Bearer <token>` 헤더를 포함해야 합니다.
@@ -9,9 +9,9 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 
 ## API 엔드포인트
 
-### 인증 (Auth)
+### 인증 및 사용자 (User/Auth)
 
-#### [POST] /api/auth/login
+#### [POST] /api/login
 로그인을 수행하고 액세스 토큰을 발급받습니다.
 
 **요청 본문(Request Body):** `LoginRequestDto`
@@ -21,9 +21,10 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 - `200`: 로그인 성공 (`LoginResponseDto`)
 - `401`: 로그인 실패 (`ErrorResponseDto`)
+- `403`: 계정 잠금 상태 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
-#### [POST] /api/auth/signup
+#### [POST] /api/signup
 새로운 사용자로 회원가입합니다.
 
 **요청 본문(Request Body):** `UserSignupDto`
@@ -33,11 +34,24 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 - `passwordConfirm` (문자열, 필수): 비밀번호 확인
 
 **응답(Responses):**
-- `201`: 회원가입 성공
+- `200`: 회원가입 성공
 - `400`: 잘못된 요청 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
-#### [POST] /api/auth/password
+#### [POST] /api/reissue
+토큰을 재발급받습니다.
+
+**응답(Responses):**
+- `200`: 재발급 성공 (`LoginResponseDto`)
+- `401`: 유효하지 않거나 만료된 리프레시 토큰 (`ErrorResponseDto`)
+
+#### [POST] /api/logout
+로그아웃을 수행합니다.
+
+**응답(Responses):**
+- `200`: 로그아웃 성공
+
+#### [POST] /api/user/password
 현재 사용자의 비밀번호를 변경합니다.
 
 **요청 본문(Request Body):** `PasswordChangeDto`
@@ -55,18 +69,17 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 
 ### 게시글 (Post)
 
-#### [GET] /api/post
+#### [GET] /api/posts
 페이징 처리된 게시글 목록을 조회합니다.
 
 **파라미터(Parameters):**
-- `page` (정수, 쿼리): 페이지 번호 (기본값: 0)
-- `size` (정수, 쿼리): 페이지 크기 (기본값: 10)
+- `page` (정수, 쿼리): 페이지 번호 (1부터 시작, 기본값: 1)
 
 **응답(Responses):**
 - `200`: 조회 성공 (`PostListResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
-#### [POST] /api/post
+#### [POST] /api/posts
 새로운 게시물을 작성합니다.
 
 **요청 본문(Request Body):** `PostCreateDto`
@@ -75,11 +88,11 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 - `tags` (문자열): 해시태그 (쉼표로 구분)
 
 **응답(Responses):**
-- `201`: 작성 성공
+- `200`: 작성 성공
 - `401`: 인증 실패 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
-#### [GET] /api/post/{no}
+#### [GET] /api/posts/{no}
 특정 게시글의 상세 정보를 조회합니다.
 
 **파라미터(Parameters):**
@@ -90,7 +103,7 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 - `404`: 게시글을 찾을 수 없음 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
-#### [PATCH] /api/post/{no}
+#### [PATCH] /api/posts/{no}
 기존 게시글을 수정합니다. 부분 업데이트(PATCH)를 지원합니다.
 
 **파라미터(Parameters):**
@@ -109,7 +122,7 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 - `404`: 게시글을 찾을 수 없음 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
-#### [DELETE] /api/post/{no}
+#### [DELETE] /api/posts/{no}
 특정 게시글을 삭제합니다.
 
 **파라미터(Parameters):**

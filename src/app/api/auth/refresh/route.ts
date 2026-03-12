@@ -11,11 +11,12 @@ export async function POST() {
 
   try {
     // TODO: 백엔드 Refresh Token 엔드포인트 확정 후 URL 반영 필요
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/refresh`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reissue`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      // Note: If the backend expects the token in a cookie, this body might be ignored or not needed
       body: JSON.stringify({ refreshToken }),
     });
 
