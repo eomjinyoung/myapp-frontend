@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error('이메일 또는 비밀번호가 일치하지 않습니다.')
+          throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.')
         }
         if (response.status === 403) {
           throw new Error('계정이 잠금 상태입니다. 관리자에게 문의하세요.')
