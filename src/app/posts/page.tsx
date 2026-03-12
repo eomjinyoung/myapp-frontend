@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { CalendarDays, User, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button-variants'
 
 async function getPosts(page: number): Promise<PostListResponse> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'

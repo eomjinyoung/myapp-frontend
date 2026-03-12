@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button-variants'
 import { Edit3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DeleteButton } from './DeleteButton'
