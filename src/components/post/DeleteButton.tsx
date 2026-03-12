@@ -3,6 +3,8 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import { toast } from 'sonner'
@@ -50,11 +52,9 @@ export function DeleteButton({ postNo }: { postNo: number }) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="gap-2" disabled={isDeleting}>
-          <Trash2 className="h-4 w-4" />
-          삭제
-        </Button>
+      <AlertDialogTrigger className={cn(buttonVariants({ variant: 'destructive', size: 'sm' }), 'gap-2')} disabled={isDeleting}>
+        <Trash2 className="h-4 w-4" />
+        삭제
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
