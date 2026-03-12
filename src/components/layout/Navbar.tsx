@@ -58,7 +58,7 @@ export function Navbar() {
                   로그인
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/register">
                 <Button size="sm">회원가입</Button>
               </Link>
             </>

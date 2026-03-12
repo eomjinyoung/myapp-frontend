@@ -23,6 +23,10 @@
   - `Navbar`: 인증 상태에 따른 동적 메뉴 (로그인/비로그인 분기 처리)
   - `Footer`: 정적 푸터 컴포넌트
 
+- **인증 페이지**: `src/app/(auth)`
+  - `login/page.tsx`: 이메일/비밀번호 기반 로그인 구현 (HTML5 Validation 적용)
+  - `register/page.tsx`: 신규 사용자 회원가입 구현 (이름, 이메일, 비밀번호, 비밀번호 확인)
+
 ## 환경 변수
 - `NEXT_PUBLIC_API_BASE_URL`: API 서버 기본 URL
   - 로컬: `http://localhost:8080`
