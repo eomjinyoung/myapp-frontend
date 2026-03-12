@@ -41,3 +41,15 @@ A custom REST API communication module is implemented to handle authentication a
 - **Functions**:
     - `apiFetch<T>`: Core fetch wrapper with middleware-like logic.
     - Convenience methods: `get`, `post`, `patch`, `del`.
+
+## Authentication State Management
+A global authentication context provides user state and actions across the application.
+
+- **Types**: Defined in `src/types/auth.ts`.
+- **Context**: `AuthContext` (in `src/context/AuthContext.tsx`) manages `user` and `isLoading` states.
+- **Hook**: `useAuth` hook for consistent access to authentication data.
+- **Provider**: `AuthProvider` wraps the root layout to ensure context availability.
+- **Functionality**:
+    - **Login**: Calls API, stores token in `localStorage`, and fetches user profile.
+    - **Logout**: Calls API to clear server session and removes local tokens.
+    - **Session Persistence**: Automatically restores user session on mount using stored tokens.
