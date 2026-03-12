@@ -39,10 +39,17 @@ export const Navbar = () => {
           <div className="flex items-center gap-2 border-l pl-6">
             {user ? (
               <>
-                <div className="mr-2 flex items-center gap-2 text-sm">
-                  <span className="font-semibold text-primary">{user.name}</span>
-                  <span className="text-muted-foreground">님</span>
-                </div>
+                <Link
+                  href="/my"
+                  className="mr-2 flex items-center gap-2 text-sm transition-colors hover:text-primary group"
+                >
+                  <span className="font-semibold text-primary group-hover:underline underline-offset-4 font-bold">
+                    {user.name}
+                  </span>
+                  <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                    님
+                  </span>
+                </Link>
                 <Link
                   href="/posts/new"
                   className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'gap-1.5')}
