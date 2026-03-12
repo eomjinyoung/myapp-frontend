@@ -7,3 +7,4 @@
 - 변경/생성/삭제한 파일 목록을 매 단계마다 요약해라.
 - 작업을 완료할 때 작업 내용을 정의된 형식에 맞춰 `git commit` 및 `git push` 하라.
 - Git Commit 메시지 형식은 `./docs/git-message-format.md`를 따르라.
+- git commit 후에 반드시 변경된 프로젝트 내용을 프로젝트 명세서 파일(`./doc/PRODUCT-SPECS.md`)에 반영하라. 
