@@ -28,3 +28,16 @@ This document summarizes the technical specifications and features of the `myapp
 - `start`: Start the production server
 - `lint`: Run ESLint
 - `format`: Run Prettier to format the codebase
+
+## API Communication Module
+A custom REST API communication module is implemented to handle authentication and direct server communication.
+
+- **Types**: Defined in `src/types/api.ts` based on `rest-api-spec.md`.
+- **Base URL**: Configured via `NEXT_PUBLIC_API_BASE_URL`.
+- **Authentication**: 
+    - Bearer Token stored in `localStorage`.
+    - Automatic token reissue via `/api/reissue` when a 401 error is encountered.
+    - Automatic redirection to `/login` on authentication failure.
+- **Functions**:
+    - `apiFetch<T>`: Core fetch wrapper with middleware-like logic.
+    - Convenience methods: `get`, `post`, `patch`, `del`.
