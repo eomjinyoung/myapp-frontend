@@ -8,16 +8,25 @@ import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 
 async function getPosts(page: number): Promise<PostListResponse> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-  const res = await fetch(`${baseUrl}/api/posts?page=${page}`, {
-    cache: 'no-store', // SSR: 최신 데이터를 위해 캐시 사용 안 함
-  })
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
+  const fetchUrl = `${baseUrl}/api/posts?page=${page}`
+  console.log(`[SSR] Fetching posts from: ${fetchUrl}`)
 
-  if (!res.ok) {
-    throw new Error('게시글 목록을 불러오는 데 실패했습니다.')
+  try {
+    const res = await fetch(fetchUrl, {
+      cache: 'no-store',
+    })
+
+    if (!res.ok) {
+      console.error(`[SSR] Fetch failed! Status: ${res.status}, URL: ${fetchUrl}`)
+      throw new Error(`게시글 목록을 불러오는 데 실패했습니다. (Status: ${res.status})`)
+    }
+
+    return res.json()
+  } catch (error: any) {
+    console.error(`[SSR] Fetch error:`, error)
+    throw error
   }
-
-  return res.json()
 }
 
 export default async function PostsPage({
