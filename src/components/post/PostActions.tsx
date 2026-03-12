@@ -23,13 +23,6 @@ export function PostActions({ postNo, authorNo }: PostActionsProps) {
 
   return (
     <div className="flex items-center gap-3 border-t pt-8">
-      <Link
-        href={`/posts/${postNo}/edit`}
-        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'gap-2')}
-      >
-        <Edit3 className="h-4 w-4" />
-        수정
-      </Link>
       <DeleteButton postNo={postNo} />
     </div>
   )

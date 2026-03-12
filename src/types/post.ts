@@ -32,3 +32,21 @@ export interface Post {
   authorName: string
   authorNo: number
 }
+
+/**
+ * PostCreateDto
+ */
+export interface PostCreateRequest {
+  title: string
+  content: string
+  tags: string
+}
+
+/**
+ * PostUpdateDto
+ */
+export interface PostUpdateRequest {
+  title: string
+  content: string
+  tags: string
+}

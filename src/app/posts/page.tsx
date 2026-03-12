@@ -37,13 +37,6 @@ export default async function PostsPage({
             <h1 className="text-3xl font-bold tracking-tight">게시글 목록</h1>
             <p className="text-muted-foreground mt-1">다양한 이야기와 정보를 확인해 보세요.</p>
           </div>
-          <Link
-            href="/posts/new"
-            className={cn(buttonVariants({ size: 'lg' }), 'hidden sm:flex gap-2')}
-          >
-            <Eye className="h-4 w-4" />
-            새 게시글 작성
-          </Link>
         </div>
 
         {/* 게시글 목록 Grid */}
