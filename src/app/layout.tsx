@@ -19,6 +19,8 @@ export const metadata: Metadata = {
 
 import { AuthProvider } from '@/context/AuthContext'
 import { Toaster } from '@/components/ui/sonner'
+import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
 
 export default function RootLayout({
   children,
@@ -29,7 +31,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
-          {children}
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           <Toaster />
         </AuthProvider>
       </body>
