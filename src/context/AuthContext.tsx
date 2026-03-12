@@ -74,9 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/logout`, {
+      await apiFetch('/api/logout', {
         method: 'POST',
-        credentials: 'include',
       })
     } catch (error) {
       console.error('Logout request failed:', error)
