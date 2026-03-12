@@ -14,7 +14,7 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 
 #### [POST] /api/login
 
-로그인을 수행하고 액세스 토큰을 발급받습니다.
+이메일과 비밀번호로 로그인하여 토큰을 발급받습니다.
 
 **요청 본문(Request Body):** `LoginRequestDto`
 
@@ -23,10 +23,11 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 
 **응답(Responses):**
 
-- `200`: 로그인 성공 (`LoginResponseDto`)
-- `401`: 로그인 실패 (`ErrorResponseDto`)
-- `403`: 계정 잠금 상태 (`ErrorResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `200`: 로그인 성공 (`accessToken`, `tokenType`, `userName` 포함 객체)
+- `401`: 인증 실패 (이메일 또는 비밀번호 불일치)
+- `403`: 계정 잠금 상태
+- `429`: 요청 제한 초과
+- `500`: 서버 에러
 
 #### [POST] /api/signup
 
@@ -42,7 +43,8 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 회원가입 성공
-- `400`: 잘못된 요청 (`ErrorResponseDto`)
+- `400`: 잘못된 입력값 (`ErrorResponseDto`)
+- `429`: 요청 제한 초과 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
 #### [POST] /api/reissue
@@ -53,14 +55,17 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 
 - `200`: 재발급 성공 (`LoginResponseDto`)
 - `401`: 유효하지 않거나 만료된 리프레시 토큰 (`ErrorResponseDto`)
+- `500`: 서버 에러 (`ErrorResponseDto`)
 
 #### [POST] /api/logout
 
-로그아웃을 수행합니다.
+현재 사용자를 로그아웃 처리하고 토큰을 무효화합니다.
 
 **응답(Responses):**
 
 - `200`: 로그아웃 성공
+- `401`: 인증 실패
+- `500`: 서버 에러
 
 #### [POST] /api/user/password
 
@@ -75,7 +80,7 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 비밀번호 변경 성공
-- `400`: 잘못된 요청 (`ErrorResponseDto`)
+- `400`: 잘못된 입력값 (`ErrorResponseDto`)
 - `401`: 인증 실패 (`ErrorResponseDto`)
 - `500`: 서버 에러 (`ErrorResponseDto`)
 
@@ -94,7 +99,9 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 조회 성공 (`PostListResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `401`: 인증 실패
+- `429`: 요청 제한 초과
+- `500`: 서버 에러
 
 #### [POST] /api/posts
 
@@ -109,8 +116,9 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 작성 성공
-- `401`: 인증 실패 (`ErrorResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `401`: 인증 실패
+- `403`: 권한 없음
+- `500`: 서버 에러
 
 #### [GET] /api/posts/{no}
 
@@ -123,8 +131,9 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 조회 성공 (`PostResponseDto`)
-- `404`: 게시글을 찾을 수 없음 (`ErrorResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `401`: 인증 실패
+- `404`: 게시글을 찾을 수 없음
+- `500`: 서버 에러
 
 #### [PATCH] /api/posts/{no}
 
@@ -143,11 +152,11 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 수정 성공
-- `400`: 잘못된 요청 (`ErrorResponseDto`)
-- `401`: 인증 실패 (`ErrorResponseDto`)
-- `403`: 권한 없음 (`ErrorResponseDto`)
-- `404`: 게시글을 찾을 수 없음 (`ErrorResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `400`: 잘못된 요청 (ID 불일치 등)
+- `401`: 인증 실패
+- `403`: 권한 없음
+- `404`: 게시글을 찾을 수 없음
+- `500`: 서버 에러
 
 #### [DELETE] /api/posts/{no}
 
@@ -160,10 +169,10 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 삭제 성공
-- `401`: 인증 실패 (`ErrorResponseDto`)
-- `403`: 권한 없음 (`ErrorResponseDto`)
-- `404`: 게시글을 찾을 수 없음 (`ErrorResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `401`: 인증 실패
+- `403`: 권한 없음
+- `404`: 게시글을 찾을 수 없음
+- `500`: 서버 에러
 
 ---
 
@@ -176,8 +185,20 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 **응답(Responses):**
 
 - `200`: 조회 성공 (`UserResponseDto`)
-- `401`: 인증 실패 (`ErrorResponseDto`)
-- `500`: 서버 에러 (`ErrorResponseDto`)
+- `401`: 인증 실패
+- `500`: 서버 에러
+
+---
+
+### 기타 (Misc)
+
+#### [GET] /api/hello
+
+서버 상태 확인용 간단한 인사말 페이지입니다.
+
+**응답(Responses):**
+
+- `200`: OK (문자열 반환)
 
 ---
 
@@ -205,18 +226,27 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 - `email` (문자열, 이메일 형식): 이메일
 - `password` (문자열): 비밀번호
 - `passwordConfirm` (문자열): 비밀번호 확인
+- `passwordMatching` (불리언): 비밀번호 일치 여부
 
 ### PasswordChangeDto
 
 - `currentPassword` (문자열): 현재 비밀번호
 - `newPassword` (문자열): 새 비밀번호
 - `newPasswordConfirm` (문자열): 새 비밀번호 확인
+- `newPasswordMatching` (불리언): 새 비밀번호 일치 여부
 
 ### PostCreateDto
 
 - `title` (문자열): 게시글 제목
 - `content` (문자열): 게시글 내용
-- `tags` (문자열): 해시태그
+- `tags` (문자열): 해시태그 (쉼표로 구분)
+
+### PostUpdateDto
+
+- `no` (정수): 게시글 번호
+- `title` (문자열): 변경할 제목
+- `content` (문자열): 변경할 내용
+- `tags` (문자열): 변경할 태그 (쉼표로 구분)
 
 ### PostListDto
 
@@ -240,7 +270,7 @@ API는 JWT 토큰을 사용하는 Bearer 인증 방식을 사용합니다. 요�
 - `createdAt` (문자열, 일시 형식): 생성 일시
 - `updatedAt` (문자열, 일시 형식): 수정 일시
 - `views` (정수): 조회수
-- `tags` (문자열): 태그 리스트
+- `tags` (문자열): 태그 리스트 (쉼표로 구분)
 - `authorName` (문자열): 작성자 이름
 - `authorNo` (정수): 작성자 번호
 
