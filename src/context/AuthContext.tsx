@@ -27,10 +27,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userData = await apiFetch<User>('/api/user/me')
       setUser(userData)
+      // 세션 복구 성공 시에도 쿠키 상태 보정
+      document.cookie = 'authStatus=true; path=/; samesite=lax'
     } catch (error) {
       console.error('Session restoration failed:', error)
       removeAccessToken()
       setUser(null)
+      // 토큰 무효 시 쿠키 제거
+      document.cookie = 'authStatus=; path=/; max-age=0'
     } finally {
       setIsLoading(false)
     }
@@ -63,6 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const loginData: LoginResponse = await response.json()
       setAccessToken(loginData.accessToken)
+      
+      // Middleware 인증 확인용 쿠키 설정 (로그인 성공 시)
+      document.cookie = 'authStatus=true; path=/; samesite=lax'
 
       const userData = await apiFetch<User>('/api/user/me')
       setUser(userData)
@@ -82,6 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       removeAccessToken()
       setUser(null)
+      // 로그아웃 시 인증 상태 쿠키 삭제
+      document.cookie = 'authStatus=; path=/; max-age=0'
     }
   }
 
