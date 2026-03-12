@@ -53,3 +53,30 @@ A global authentication context provides user state and actions across the appli
     - **Login**: Calls API, stores token in `localStorage`, and fetches user profile.
     - **Logout**: Calls API to clear server session and removes local tokens.
     - **Session Persistence**: Automatically restores user session on mount using stored tokens.
+
+## Common Layout Components
+The application uses a consistent layout across all pages.
+
+- **Navbar**: 
+    - Responsive navigation bar using `shadcn/ui` and `Lucide React`.
+    - Content changes dynamically based on authentication state.
+    - Logged-out state: Shows "로그인" and "회원가입" buttons.
+    - Logged-in state: Shows `user.name`, "게시글 작성", and "로그아웃" buttons.
+- **Footer**: 
+    - Static server component displaying service information and copyright.
+- **Root Layout**: 
+    - Integrates the `AuthProvider`, `Navbar`, `main` (content), and `Footer`.
+    - Includes `Toaster` for global notifications.
+
+## Authentication Pages
+- **Registration (`/register`)**:
+    - Fields: Name, Email, Password, Password Confirm.
+    - Validation: HTML5 based (required, minLength, pattern).
+    - Custom logic: Password matching check.
+- **Login (`/login`)**:
+    - Fields: Email, Password.
+    - Integration: Uses `useAuth().login()` for session management.
+    - Redirect: Supports `redirect` query parameter for post-login navigation.
+- **Common Features**: 
+    - Loading states with disabled buttons.
+    - Integrated error messaging for API failures (400, 401, 403).
