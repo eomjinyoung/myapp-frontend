@@ -1,9 +1,16 @@
 import React from 'react'
 import Link from 'next/link'
 import { PostListResponse } from '@/types/post'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { CalendarDays, User, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, ChevronLeft, ChevronRight, User, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button-variants'
 
@@ -44,57 +51,71 @@ export default async function PostsPage({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">게시글 목록</h1>
-            <p className="text-muted-foreground mt-1">다양한 이야기와 정보를 확인해 보세요.</p>
+            <p className="text-muted-foreground mt-1 text-sm">총 {data.posts.length}개의 게시글이 있습니다.</p>
           </div>
         </div>
 
-        {/* 게시글 목록 Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-          {data.posts.map((post) => (
-            <Link key={post.no} href={`/posts/${post.no}`}>
-              <Card className="group border shadow-sm transition-all hover:shadow-md hover:border-primary/20 overflow-hidden">
-                <div className="flex flex-col lg:flex-row">
-                  <CardHeader className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="font-normal">
-                        No. {post.no}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-xl group-hover:text-primary transition-colors leading-snug">
+        {/* 게시글 목록 Table */}
+        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead className="w-[80px] text-center">No.</TableHead>
+                <TableHead>제목</TableHead>
+                <TableHead className="w-[120px]">작성자</TableHead>
+                <TableHead className="w-[120px] text-center">작성일</TableHead>
+                <TableHead className="w-[100px] text-center">조회수</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.posts.map((post) => (
+                <TableRow key={post.no} className="cursor-pointer hover:bg-muted/30 transition-colors group">
+                  <TableCell className="text-center font-medium">
+                    <Badge variant="outline" className="font-normal text-xs">
+                      {post.no}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Link href={`/posts/${post.no}`} className="block font-semibold group-hover:text-primary transition-colors py-1">
                       {post.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="lg:w-72 flex flex-col justify-center lg:border-l bg-muted/5 p-6 space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="h-4 w-4" />
-                      <span className="font-medium text-foreground">{post.authorName}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5" />
-                        {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="size-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="size-3 text-primary" />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5" />
-                        조회 {post.views}
-                      </div>
+                      <span className="truncate max-w-[80px]">{post.authorName}</span>
                     </div>
-                  </CardContent>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col items-center gap-0.5 text-xs text-muted-foreground">
+                      <span>{new Date(post.createdAt).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <Eye className="size-3" />
+                      {post.views}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
 
-          {data.posts.length === 0 && (
-            <div className="py-20 text-center border rounded-xl border-dashed">
-              <p className="text-muted-foreground">등록된 게시글이 없습니다.</p>
-            </div>
-          )}
+              {data.posts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-48 text-center text-muted-foreground">
+                    등록된 게시글이 없습니다.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
 
         {/* 페이지네이션 */}
         {data.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
+          <div className="flex items-center justify-center gap-2 mt-4">
             <Link
               href={`/posts?page=${Math.max(1, data.currentPage - 1)}`}
               className={cn(
@@ -106,21 +127,25 @@ export default async function PostsPage({
             </Link>
             
             <div className="flex items-center gap-1 mx-2">
-              {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((page) => (
-                <Link
-                  key={page}
-                  href={`/posts?page=${page}`}
-                  className={cn(
-                    buttonVariants({ 
-                      variant: page === data.currentPage ? 'default' : 'ghost',
-                      size: 'sm'
-                    }),
-                    'w-9 h-9'
-                  )}
-                >
-                  {page}
-                </Link>
-              ))}
+              {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
+                // 단순화된 페이지네이션 로직 (필요 시 보완 가능)
+                const pageNum = i + 1;
+                return (
+                  <Link
+                    key={pageNum}
+                    href={`/posts?page=${pageNum}`}
+                    className={cn(
+                      buttonVariants({ 
+                        variant: pageNum === data.currentPage ? 'default' : 'ghost',
+                        size: 'sm'
+                      }),
+                      'w-9 h-9'
+                    )}
+                  >
+                    {pageNum}
+                  </Link>
+                );
+              })}
             </div>
 
             <Link
