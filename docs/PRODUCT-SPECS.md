@@ -16,7 +16,7 @@
 
 - **인증 상태 관리**: `src/context/AuthContext.tsx`
   - Access Token: 메모리 저장 (React Context)
-  - Refresh Token: HttpOnly Cookie 기반 (내부 `/api/auth/refresh` 프록시 활용)
+  - Refresh Token: HttpOnly Cookie 기반 (REST API 서버 직접 통신)
   - `useAuth` 훅을 통한 전역 인증 상태 및 로그인/로그아웃 기능 제공
 
 - **공통 레이아웃**: `src/components/layout`

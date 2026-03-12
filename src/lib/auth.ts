@@ -1,6 +1,8 @@
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
 export async function refreshAccessToken(): Promise<string | null> {
   try {
-    const response = await fetch("/api/auth/refresh", {
+    const response = await fetch(`${BASE_URL}/api/reissue`, {
       method: "POST",
     });
 
@@ -8,8 +10,8 @@ export async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
 
-    const { accessToken } = await response.json();
-    return accessToken;
+    const data = await response.json();
+    return data.accessToken;
   } catch (error) {
     console.error("Failed to refresh access token:", error);
     return null;
