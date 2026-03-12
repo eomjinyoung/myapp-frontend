@@ -14,6 +14,15 @@
   - 401 에러 발생 시 자동 토큰 재발급 및 재시도 로직
   - API 공통 응답 및 에러 타입 정의 (`src/types/api.ts`)
 
+- **인증 상태 관리**: `src/context/AuthContext.tsx`
+  - Access Token: 메모리 저장 (React Context)
+  - Refresh Token: HttpOnly Cookie 기반 (내부 `/api/auth/refresh` 프록시 활용)
+  - `useAuth` 훅을 통한 전역 인증 상태 및 로그인/로그아웃 기능 제공
+
+- **공통 레이아웃**: `src/components/layout`
+  - `Navbar`: 인증 상태에 따른 동적 메뉴 (로그인/비로그인 분기 처리)
+  - `Footer`: 정적 푸터 컴포넌트
+
 ## 환경 변수
 - `NEXT_PUBLIC_API_BASE_URL`: API 서버 기본 URL
   - 로컬: `http://localhost:8080`
