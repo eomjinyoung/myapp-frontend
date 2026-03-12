@@ -107,7 +107,8 @@ export const apiFetch = async <T>(url: string, options: RequestInit = {}): Promi
     return {} as T
   }
 
-  return await response.json()
+  const text = await response.text()
+  return text ? JSON.parse(text) : ({} as T)
 }
 
 /**
