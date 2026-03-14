@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { apiFetch, getAccessToken } from '@/lib/api'
+import { get, getAccessToken } from '@/lib/api'
 import { User as UserType } from '@/types/auth'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -26,8 +26,8 @@ export default function MyPage() {
 
       try {
         setIsLoading(true)
-        // 명세에 따라 REST API 직접 호출
-        const userData = await apiFetch<UserType>('/api/user/me')
+        // 명세에 따라 REST API 호출
+        const userData = await get<UserType>('/api/user/me')
         setUser(userData)
       } catch (err: any) {
         console.error('Failed to fetch user data:', err)
