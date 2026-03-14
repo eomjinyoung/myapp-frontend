@@ -13,6 +13,7 @@ import { ChevronLeft, Send, Hash } from 'lucide-react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { CreatePostRequest } from '@/types/post'
+import { post } from '@/lib/api'
 
 export default function NewPostPage() {
   const { user, login } = useAuth()
@@ -54,33 +55,20 @@ export default function NewPostPage() {
     }
 
     setLoading(true)
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
-    const token = localStorage.getItem('accessToken')
 
     try {
-      const res = await fetch(`${baseUrl}/api/posts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (res.ok) {
-        toast.success('게시글이 등록되었습니다!')
-        router.push('/posts')
-        router.refresh() // 목록 캐시 갱신
-      } else if (res.status === 401) {
+      await post('/api/posts', formData)
+      toast.success('게시글이 등록되었습니다!')
+      router.push('/posts')
+      router.refresh() // 목록 캐시 갱신
+    } catch (error: any) {
+      console.error('Post creation error:', error)
+      if (error.status === 401) {
         toast.error('세션이 만료되었습니다. 다시 로그인해 주세요.')
         router.push('/login')
       } else {
-        const errorData = await res.json().catch(() => ({}))
-        toast.error(errorData.message || '게시글 등록에 실패했습니다.')
+        toast.error(error.message || '게시글 등록에 실패했습니다.')
       }
-    } catch (error) {
-      console.error('Post creation error:', error)
-      toast.error('네트워크 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }

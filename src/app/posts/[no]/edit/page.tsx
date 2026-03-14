@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { Post, UpdatePostRequest } from '@/types/post'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { get, patch } from '@/lib/api'
 
 export default function EditPostPage() {
   const { user } = useAuth()
@@ -33,33 +34,24 @@ export default function EditPostPage() {
 
   useEffect(() => {
     const fetchPost = async () => {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
       try {
-        const res = await fetch(`${baseUrl}/api/posts/${postNo}`, {
+        const data = await get<Post>(`/api/posts/${postNo}`, {
           cache: 'no-store'
         })
-        
-        if (res.ok) {
-          const data: Post = await res.json()
-          setFormData({
-            title: data.title,
-            content: data.content,
-            tags: data.tags || '',
-          })
-          setPostAuthorNo(data.authorNo)
-          
-          // 본인 확인 (user 상태가 있을 때만 체크)
-          // user가 로딩 중일 수 있으므로 여기서 바로 체크하지 않고 렌더링 시 처리하거나 
-          // user 데이터가 들어올 때 체크 로직을 넣을 수 있음
-        } else if (res.status === 404) {
+        setFormData({
+          title: data.title,
+          content: data.content,
+          tags: data.tags || '',
+        })
+        setPostAuthorNo(data.authorNo)
+      } catch (err: any) {
+        console.error('Fetch post error:', err)
+        if (err.status === 404) {
           toast.error('존재하지 않는 게시글입니다.')
           router.push('/posts')
         } else {
-          setError('게시글 정보를 불러오는 데 실패했습니다.')
+          setError(err.message || '게시글 정보를 불러오는 데 실패했습니다.')
         }
-      } catch (err) {
-        console.error('Fetch post error:', err)
-        setError('네트워크 오류가 발생했습니다.')
       } finally {
         setLoading(false)
       }
@@ -97,35 +89,23 @@ export default function EditPostPage() {
     }
 
     setSubmitting(true)
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
-    const token = localStorage.getItem('accessToken')
+    setSubmitting(true)
 
     try {
-      const res = await fetch(`${baseUrl}/api/posts/${postNo}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (res.ok) {
-        toast.success('게시글이 수정되었습니다!')
-        router.push(`/posts/${postNo}`)
-        router.refresh()
-      } else if (res.status === 401) {
+      await patch(`/api/posts/${postNo}`, formData)
+      toast.success('게시글이 수정되었습니다!')
+      router.push(`/posts/${postNo}`)
+      router.refresh()
+    } catch (error: any) {
+      console.error('Post update error:', error)
+      if (error.status === 401) {
         toast.error('세션이 만료되었습니다. 다시 로그인해 주세요.')
         router.push('/login')
-      } else if (res.status === 403) {
+      } else if (error.status === 403) {
         toast.error('수정 권한이 없습니다.')
       } else {
-        const errorData = await res.json().catch(() => ({}))
-        toast.error(errorData.message || '게시글 수정에 실패했습니다.')
+        toast.error(error.message || '게시글 수정에 실패했습니다.')
       }
-    } catch (error) {
-      console.error('Post update error:', error)
-      toast.error('네트워크 오류가 발생했습니다.')
     } finally {
       setSubmitting(false)
     }
