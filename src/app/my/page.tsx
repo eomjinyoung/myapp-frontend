@@ -2,7 +2,6 @@
 
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { get, getAccessToken } from '@/lib/api'
 import { User as UserType } from '@/types/auth'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -11,9 +10,9 @@ import { User, Mail, ShieldCheck, AlertCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 
-export default function MyPage() {
-  const router = useRouter()
-  const { user: authUser } = useAuth()
+
+  export default function MyPage() {
+    const router = useRouter()
 
   // 토큰 미존재 시 리다이렉트 처리 유지
   useEffect(() => {
