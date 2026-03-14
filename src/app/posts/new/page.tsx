@@ -14,11 +14,14 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { CreatePostRequest } from '@/types/post'
 import { post } from '@/lib/api'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/queryKeys'
 
 export default function NewPostPage() {
   const { user, login } = useAuth()
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const queryClient = useQueryClient()
+  
   const [formData, setFormData] = useState<CreatePostRequest>({
     title: '',
     content: '',
@@ -27,8 +30,6 @@ export default function NewPostPage() {
 
   useEffect(() => {
     // 세션 복구 대기 및 권한 체크
-    // 실제 운영 환경에서는 AuthProvider의 초기화 상태를 기다려야 하지만, 
-    // 여기서는 로컬 스토리지 등에 토큰이 없는 경우만 단순 체크
     const token = localStorage.getItem('accessToken')
     if (!token) {
       toast.error('로그인이 필요한 서비스입니다.')
@@ -36,12 +37,31 @@ export default function NewPostPage() {
     }
   }, [router])
 
+  const mutation = useMutation({
+    mutationFn: (data: CreatePostRequest) => post('/api/posts', data),
+    onSuccess: () => {
+      toast.success('게시글이 등록되었습니다!')
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all() })
+      router.push('/posts')
+      router.refresh() // 목록 캐시 갱신
+    },
+    onError: (error: any) => {
+      console.error('Post creation error:', error)
+      if (error.status === 401) {
+        toast.error('세션이 만료되었습니다. 다시 로그인해 주세요.')
+        router.push('/login')
+      } else {
+        toast.error(error.message || '게시글 등록에 실패했습니다.')
+      }
+    }
+  })
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!formData.title.trim()) {
@@ -54,24 +74,7 @@ export default function NewPostPage() {
       return
     }
 
-    setLoading(true)
-
-    try {
-      await post('/api/posts', formData)
-      toast.success('게시글이 등록되었습니다!')
-      router.push('/posts')
-      router.refresh() // 목록 캐시 갱신
-    } catch (error: any) {
-      console.error('Post creation error:', error)
-      if (error.status === 401) {
-        toast.error('세션이 만료되었습니다. 다시 로그인해 주세요.')
-        router.push('/login')
-      } else {
-        toast.error(error.message || '게시글 등록에 실패했습니다.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    mutation.mutate(formData)
   }
 
   return (
@@ -141,17 +144,17 @@ export default function NewPostPage() {
               type="button"
               variant="outline"
               onClick={() => router.back()}
-              disabled={loading}
+              disabled={mutation.isPending}
               className="px-6"
             >
               취소
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={mutation.isPending}
               className="px-8 gap-2 shadow-md hover:shadow-lg transition-all"
             >
-              {loading ? (
+              {mutation.isPending ? (
                 <>
                   <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   등록 중...

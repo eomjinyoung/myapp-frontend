@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { get, getAccessToken } from '@/lib/api'
@@ -8,41 +8,37 @@ import { User as UserType } from '@/types/auth'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { User, Mail, ShieldCheck, AlertCircle } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/queryKeys'
 
 export default function MyPage() {
   const router = useRouter()
   const { user: authUser } = useAuth()
-  const [user, setUser] = useState<UserType | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
+  // 토큰 미존재 시 리다이렉트 처리 유지
   useEffect(() => {
-    const fetchUserData = async () => {
-      const token = getAccessToken()
-      if (!token) {
-        router.replace('/login?redirect=/my')
-        return
-      }
-
-      try {
-        setIsLoading(true)
-        // 명세에 따라 REST API 호출
-        const userData = await get<UserType>('/api/user/me')
-        setUser(userData)
-      } catch (err: any) {
-        console.error('Failed to fetch user data:', err)
-        if (err.status === 401) {
-          router.replace('/login')
-        } else {
-          setError(err.message || '사용자 정보를 불러오는 데 실패했습니다.')
-        }
-      } finally {
-        setIsLoading(false)
-      }
+    const token = getAccessToken()
+    if (!token) {
+      router.replace('/login?redirect=/my')
     }
-
-    fetchUserData()
   }, [router])
+
+  const { data: user, isLoading, error } = useQuery<UserType, any>({
+    queryKey: queryKeys.auth.me(),
+    queryFn: async () => {
+      const userData = await get<UserType>('/api/user/me')
+      return userData
+    },
+    // 토큰이 있을 때만 패칭
+    enabled: typeof window !== 'undefined' ? !!getAccessToken() : false
+  })
+
+  // 에러 발생 시 로그인 세션 만료 등의 처리
+  useEffect(() => {
+    if (error && error.status === 401) {
+      router.replace('/login')
+    }
+  }, [error, router])
 
   if (isLoading) {
     return (
@@ -56,6 +52,7 @@ export default function MyPage() {
   }
 
   if (error) {
+    const errorMessage = error.message || '사용자 정보를 불러오는 데 실패했습니다.'
     return (
       <div className="container mx-auto py-12 px-4 max-w-2xl">
         <Card className="border-destructive/50 shadow-lg">
@@ -63,7 +60,7 @@ export default function MyPage() {
             <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-destructive">오류가 발생했습니다</h3>
-              <p className="text-muted-foreground">{error}</p>
+              <p className="text-muted-foreground">{errorMessage}</p>
             </div>
             <button 
               onClick={() => window.location.reload()}

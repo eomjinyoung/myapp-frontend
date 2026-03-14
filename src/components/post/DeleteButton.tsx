@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { Trash2 } from 'lucide-react'
@@ -19,21 +18,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/queryKeys'
 
 export function DeleteButton({ postNo }: { postNo: number }) {
   const router = useRouter()
-  const [isDeleting, setIsDeleting] = useState(false)
+  const queryClient = useQueryClient()
 
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      await apiFetch(`/api/posts/${postNo}`, {
-        method: 'DELETE',
-      })
+  const mutation = useMutation({
+    mutationFn: () => apiFetch(`/api/posts/${postNo}`, { method: 'DELETE' }),
+    onSuccess: () => {
       toast.success('게시글이 삭제되었습니다.')
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.list() })
       router.push('/posts')
       router.refresh()
-    } catch (err: any) {
+    },
+    onError: (err: any) => {
       if (err.status === 401) {
         toast.error('로그인이 필요합니다.')
         router.push('/login')
@@ -45,14 +45,18 @@ export function DeleteButton({ postNo }: { postNo: number }) {
       } else {
         toast.error(err.message || '게시글 삭제에 실패했습니다.')
       }
-    } finally {
-      setIsDeleting(false)
     }
+  })
+
+  const handleDelete = () => {
+    mutation.mutate()
   }
+
+  const isPending = mutation.isPending
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className={cn(buttonVariants({ variant: 'destructive', size: 'sm' }), 'gap-2')} disabled={isDeleting}>
+      <AlertDialogTrigger className={cn(buttonVariants({ variant: 'destructive', size: 'sm' }), 'gap-2')} disabled={isPending}>
         <Trash2 className="h-4 w-4" />
         삭제
       </AlertDialogTrigger>
@@ -64,13 +68,13 @@ export function DeleteButton({ postNo }: { postNo: number }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>취소</AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            disabled={isDeleting}
+            disabled={isPending}
           >
-            {isDeleting ? '삭제 중...' : '확인'}
+            {isPending ? '삭제 중...' : '확인'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

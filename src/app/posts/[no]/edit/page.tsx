@@ -15,15 +15,17 @@ import { buttonVariants } from '@/components/ui/button-variants'
 import { Post, UpdatePostRequest } from '@/types/post'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { get, patch } from '@/lib/api'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/queryKeys'
 
 export default function EditPostPage() {
   const { user } = useAuth()
   const router = useRouter()
   const params = useParams()
   const postNo = params.no as string
+  const queryClient = useQueryClient()
   
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState<UpdatePostRequest>({
     title: '',
@@ -67,6 +69,28 @@ export default function EditPostPage() {
     fetchPost()
   }, [postNo, router])
 
+  const mutation = useMutation({
+    mutationFn: (data: UpdatePostRequest) => patch(`/api/posts/${postNo}`, data),
+    onSuccess: () => {
+      toast.success('게시글이 수정되었습니다!')
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postNo) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.list() })
+      router.push(`/posts/${postNo}`)
+      router.refresh()
+    },
+    onError: (error: any) => {
+      console.error('Post update error:', error)
+      if (error.status === 401) {
+        toast.error('세션이 만료되었습니다. 다시 로그인해 주세요.')
+        router.push('/login')
+      } else if (error.status === 403) {
+        toast.error('수정 권한이 없습니다.')
+      } else {
+        toast.error(error.message || '게시글 수정에 실패했습니다.')
+      }
+    }
+  })
+
   // 권한 체크: 로딩 완료 후 본인 및 로그인 사용자 확인
   const isAuthor = user && postAuthorNo && user.no === postAuthorNo
 
@@ -75,7 +99,7 @@ export default function EditPostPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!formData.title.trim()) {
@@ -88,27 +112,7 @@ export default function EditPostPage() {
       return
     }
 
-    setSubmitting(true)
-    setSubmitting(true)
-
-    try {
-      await patch(`/api/posts/${postNo}`, formData)
-      toast.success('게시글이 수정되었습니다!')
-      router.push(`/posts/${postNo}`)
-      router.refresh()
-    } catch (error: any) {
-      console.error('Post update error:', error)
-      if (error.status === 401) {
-        toast.error('세션이 만료되었습니다. 다시 로그인해 주세요.')
-        router.push('/login')
-      } else if (error.status === 403) {
-        toast.error('수정 권한이 없습니다.')
-      } else {
-        toast.error(error.message || '게시글 수정에 실패했습니다.')
-      }
-    } finally {
-      setSubmitting(false)
-    }
+    mutation.mutate(formData)
   }
 
   if (loading) {
@@ -218,17 +222,17 @@ export default function EditPostPage() {
               type="button"
               variant="outline"
               onClick={() => router.back()}
-              disabled={submitting}
+              disabled={mutation.isPending}
               className="px-6 border-muted-foreground/30 hover:bg-muted/50"
             >
               취소
             </Button>
             <Button
               type="submit"
-              disabled={submitting}
+              disabled={mutation.isPending}
               className="px-10 gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all bg-primary hover:bg-primary/90"
             >
-              {submitting ? (
+              {mutation.isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
                   수정 중...
