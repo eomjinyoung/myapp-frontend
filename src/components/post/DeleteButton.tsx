@@ -71,7 +71,7 @@ export function DeleteButton({ postNo }: { postNo: number }) {
           <AlertDialogCancel disabled={isPending}>취소</AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className={buttonVariants({ variant: 'destructive' })}
             disabled={isPending}
           >
             {isPending ? '삭제 중...' : '확인'}
